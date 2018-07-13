@@ -37,10 +37,9 @@ using namespace datastructure;
 namespace MODULES {
 namespace NONFREEOPENCV {
 
-SolARDescriptorsExtractorSURF128Opencv::SolARDescriptorsExtractorSURF128Opencv()
+SolARDescriptorsExtractorSURF128Opencv::SolARDescriptorsExtractorSURF128Opencv():ComponentBase(xpcf::toUUID<SolARDescriptorsExtractorSURF128Opencv>())
 {
-    setUUID(SolARDescriptorsExtractorSURF128Opencv::UUID);
-    addInterface<api::features::IDescriptorsExtractor>(this,api::features::IDescriptorsExtractor::UUID, "interface api::features::DescriptorsExtractor");
+    addInterface<api::features::IDescriptorsExtractor>(this);
     LOG_DEBUG(" SolARDescriptorsExtractorSURF128Opencv constructor")
     // m_extractor must have a default implementation : initialize default extractor type
     m_extractor=SURF::create(100,4,3,true);

@@ -23,7 +23,7 @@
 #include <opencv2/xfeatures2d.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "IComponentManager.h"
+
 
 XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARKeypointDetectorNonFreeOpencv);
 
@@ -38,10 +38,9 @@ using namespace datastructure;
 namespace MODULES {
 namespace NONFREEOPENCV {
 
-SolARKeypointDetectorNonFreeOpencv::SolARKeypointDetectorNonFreeOpencv()
+SolARKeypointDetectorNonFreeOpencv::SolARKeypointDetectorNonFreeOpencv():ComponentBase(xpcf::toUUID<SolARKeypointDetectorNonFreeOpencv>())
 {
-    setUUID(SolARKeypointDetectorNonFreeOpencv::UUID);
-    addInterface<api::features::IKeypointDetector>(this,api::features::IKeypointDetector::UUID, "interface api::features::IKeypointDetector");
+    addInterface<api::features::IKeypointDetector>(this);
 
     LOG_DEBUG("SolARKeypointDetectorNonFreeOpencv constructor");
     m_type=KeypointDetectorType::AKAZE;
@@ -171,7 +170,7 @@ void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> &image, std::v
     kptsFilter.retainBest(kpts,m_select_best_N_features);
 
     for(std::vector<cv::KeyPoint>::iterator itr=kpts.begin();itr!=kpts.end();++itr){
-        sptrnms::shared_ptr<Keypoint> kpa = sptrnms::make_shared<Keypoint>();
+        SRef<Keypoint> kpa = xpcf::utils::make_shared<Keypoint>();
 
         kpa->init((*itr).pt.x*ratioInv,(*itr).pt.y*ratioInv,(*itr).size,(*itr).angle,(*itr).response,(*itr).octave,(*itr).class_id) ;
         keypoints.push_back(kpa);

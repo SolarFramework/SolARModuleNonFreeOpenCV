@@ -26,5 +26,5 @@
 #else //_WIN32
 #define SOLAROPENCVNONFREE_EXPORT_API
 #endif //_WIN32
-
+#include "SolARModuleNonFreeOpencv_traits.h"
 #endif //SOLAR_NONFREE_OPENCV_API_H

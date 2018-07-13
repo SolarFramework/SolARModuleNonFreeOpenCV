@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-#include "SolARModuleManagerOpencv.h"
-#include "SolARModuleManagerNonFreeOpencv.h"
+#include "xpcf/component/ComponentBase.h"
+
+#include "SolARModuleOpencv_traits.h"
+#include "SolARModuleNonFreeOpencv_traits.h"
+
+#include "api/image/IImageLoader.h"
+#include "api/display/IImageViewer.h"
+#include "api/display/I2DOverlay.h"
+#include "api/features/IDescriptorMatcher.h"
+#include "api/features/IKeypointDetector.h"
+#include "api/features/IDescriptorsExtractor.h"
+#include "api/display/ISideBySideOverlay.h"
 
 #include <iostream>
 
@@ -30,40 +40,54 @@ namespace xpcf  = org::bcom::xpcf;
 
 int run(int argc,char** argv)
 {
-    // instantiate module manager
-    MODULES::OPENCV::SolARModuleManagerOpencv opencvModule(argv[3]);
-    if (!opencvModule.isLoaded()) // xpcf library load has failed
+
+    // load libraries
+    SRef<xpcf::IComponentManager> xpcfComponentManagerOpenCV = xpcf::getComponentManagerInstance();
+    org::bcom::xpcf::XPCFErrorCode returnErrCode = xpcfComponentManagerOpenCV->load("$BCOMDEVROOT/.xpcf/SolAR/xpcf_SolARModuleOpenCV_registry.xml");
+    // instantiate module managers
+   /*
+    if (!xpcfComponentManagerOpenCV->isLoaded()) // xpcf library load has failed
     {
-        LOG_ERROR("XPCF library load has failed")
+        LOG_ERROR("SolARModuleOpenCV library load has failed")
         return -1;
     }
-
-    MODULES::NONFREEOPENCV::SolARModuleManagerOpencvNonFree opencvNonFreeModule(argv[2]);
-    if (!opencvNonFreeModule.isLoaded()) // xpcf library load has failed
+    */
+    SRef<xpcf::IComponentManager> xpcfComponentManagerNonFreeOpenCV = xpcf::getComponentManagerInstance();
+   
+    org::bcom::xpcf::XPCFErrorCode returnErrCode2 = xpcfComponentManagerNonFreeOpenCV->load("$BCOMDEVROOT/.xpcf/SolAR/xpcf_SolARModuleNonFreeOpenCV_registry.xml");
+    
+    // instantiate module managers
+    
+    /*
+    if (!xpcfComponentManagerNonFreeOpenCV->isLoaded()) // xpcf library load has failed
     {
-        LOG_ERROR("XPCF library load has failed")
+        LOG_ERROR("SolARModuleNonFreeOpenCV library load has failed")
         return -1;
-    }       
+    }
+    */
+
 
  // declarations and creation of components
-    SRef<image::IImageLoader> imageLoader1 = opencvModule.createComponent<image::IImageLoader>(MODULES::OPENCV::UUID::IMAGE_LOADER);
-    SRef<image::IImageLoader> imageLoader2 = opencvModule.createComponent<image::IImageLoader>(MODULES::OPENCV::UUID::IMAGE_LOADER);
-    SRef<features::IDescriptorMatcher> matcher = opencvModule.createComponent<features::IDescriptorMatcher>(MODULES::OPENCV::UUID::DESCRIPTOR_MATCHER_KNN);
-    SRef<display::IImageViewer> viewer = opencvModule.createComponent<display::IImageViewer>(MODULES::OPENCV::UUID::IMAGE_VIEWER);
-    SRef<display::ISideBySideOverlay> overlay = opencvModule.createComponent<display::ISideBySideOverlay>(MODULES::OPENCV::UUID::OVERLAYSBS);
-    SRef<features::IKeypointDetector> keypointsDetector = opencvNonFreeModule.createComponent<features::IKeypointDetector>(MODULES::NONFREEOPENCV::UUID::KEYPOINT_DETECTOR_NONFREEOPENCV);
-    SRef<features::IDescriptorsExtractor> extractorSIFT = opencvNonFreeModule.createComponent<features::IDescriptorsExtractor>(MODULES::NONFREEOPENCV::UUID::DESCRIPTORS_EXTRACTOR_SIFT);    
+    SRef<image::IImageLoader> imageLoader1 = xpcfComponentManagerOpenCV->create<SolAR::MODULES::OPENCV::SolARImageLoaderOpencv>()->bindTo<image::IImageLoader>();
+    SRef<image::IImageLoader> imageLoader2 = xpcfComponentManagerOpenCV->create<SolAR::MODULES::OPENCV::SolARImageLoaderOpencv>()->bindTo<image::IImageLoader>();
+    SRef<features::IDescriptorMatcher> matcher = xpcfComponentManagerOpenCV->create<SolAR::MODULES::OPENCV::SolARDescriptorMatcherKNNOpencv>()->bindTo<features::IDescriptorMatcher>();
+    SRef<display::IImageViewer> viewer = xpcfComponentManagerOpenCV->create<SolAR::MODULES::OPENCV::SolARImageViewerOpencv>()->bindTo<display::IImageViewer>();
+    SRef<display::ISideBySideOverlay> overlay = xpcfComponentManagerOpenCV->create<SolAR::MODULES::OPENCV::SolARSideBySideOverlayOpencv>()->bindTo<display::ISideBySideOverlay>();
+
+    SRef<features::IKeypointDetector> keypointsDetector = xpcfComponentManagerNonFreeOpenCV->create<SolAR::MODULES::NONFREEOPENCV::SolARKeypointDetectorNonFreeOpencv>()->bindTo<features::IKeypointDetector>();
+    SRef<features::IDescriptorsExtractor> extractorSIFT = xpcfComponentManagerNonFreeOpenCV->create<SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSIFTOpencv>()->bindTo<features::IDescriptorsExtractor>();
 
     if (!imageLoader1 || !imageLoader2 || !keypointsDetector || !extractorSIFT || !matcher || !viewer || !overlay)
     {
         LOG_ERROR("One or more component creations have failed");
         return -1;
     }
-
+ 
+ 
     SRef<Image>                                        image1;
     SRef<Image>                                        image2;
-    std::vector< sptrnms::shared_ptr<Keypoint>>        keypoints1;
-    std::vector< sptrnms::shared_ptr<Keypoint>>        keypoints2;
+    std::vector< SRef<Keypoint>>        keypoints1;
+    std::vector< SRef<Keypoint>>        keypoints2;
     SRef<DescriptorBuffer>                             descriptors1;
     SRef<DescriptorBuffer>                             descriptors2;
     std::vector<DescriptorMatch>                       matches;
@@ -91,7 +115,7 @@ int run(int argc,char** argv)
        LOG_ERROR("Cannot load image with path {}", argv[2]);
        return -1;
     }
-
+  
     // Detect the keypoints of the first image
     keypointsDetector->detect(image1, keypoints1);
 
@@ -112,7 +136,7 @@ int run(int argc,char** argv)
     matchedKeypoints1.clear();
     matchedKeypoints2.clear();
 
-    for( int i = 0; i < matches.size(); i++ )
+    for(unsigned int i = 0; i < matches.size(); i++ )
     {
         matchedKeypoints1.push_back(xpcf::utils::make_shared<Point2Df>(keypoints1[ matches[i].getIndexInDescriptorA()]->getX(),keypoints1[ matches[i].getIndexInDescriptorA()]->getY()));
         matchedKeypoints2.push_back(xpcf::utils::make_shared<Point2Df>(keypoints2[ matches[i].getIndexInDescriptorB()]->getX(),keypoints2[ matches[i].getIndexInDescriptorB()]->getY()));
@@ -131,7 +155,7 @@ int run(int argc,char** argv)
             LOG_INFO("End of DescriptorMatcherOpenCVStaticTest");
         }
     }
-
+    
     return 0;
 }
 

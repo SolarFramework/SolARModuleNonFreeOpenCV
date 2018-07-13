@@ -41,14 +41,13 @@ HEADERS += interfaces/SolAROpencvNonFreeAPI.h \
 interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
 interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
 interfaces/SolARDescriptorsExtractorSIFTOpencv.h \
-interfaces/SolARModuleManagerNonFreeOpencv.h \
-interfaces/SolARKeypointDetectorNonFreeOpencv.h
+interfaces/SolARKeypointDetectorNonFreeOpencv.h \
+    interfaces/SolARModuleNonFreeOpencv_traits.h
 
 SOURCES += src/SolARModuleNonFreeOpencv.cpp \
     src/SolARDescriptorsExtractorSIFTOpencv.cpp \
     src/SolARDescriptorsExtractorSURF64Opencv.cpp \
     src/SolARDescriptorsExtractorSURF128Opencv.cpp \
-    src/SolARModuleManagerNonFreeOpencv.cpp \  
     src/SolARKeypointDetectorNonFreeOpencv.cpp
  
 unix {
@@ -73,7 +72,7 @@ win32 {
 header_files.path = $${PROJECTDEPLOYDIR}/interfaces
 header_files.files = $$files($${PWD}/interfaces/*.h*)
 
-xpcf_xml_files.path = $${PROJECTDEPLOYDIR}
+xpcf_xml_files.path = $$(BCOMDEVROOT)/.xpcf/SolAR
 xpcf_xml_files.files=$$files($${PWD}/xpcf*.xml)
 
 INSTALLS += header_files

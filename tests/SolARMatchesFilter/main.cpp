@@ -48,7 +48,7 @@ namespace xpcf  = org::bcom::xpcf;
 
 int run(int argc, char **argv)
 {
-
+/*
  // declarations
     xpcf::utils::uuids::string_generator    gen;
     SRef<image::IImageLoader>               imageLoader;
@@ -185,7 +185,7 @@ int run(int argc, char **argv)
            process = false;
        }
    }
-
+*/
    return 0;
 }
 

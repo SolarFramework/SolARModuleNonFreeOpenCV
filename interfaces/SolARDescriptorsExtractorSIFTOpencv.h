@@ -21,11 +21,22 @@
 // Definition of SolARDescriptorExtractorOpencv Class //
 // part of SolAR namespace //
 
-#include "ComponentBase.h"
+#include "xpcf/component/ComponentBase.h"
 #include "SolAROpencvNonFreeAPI.h"
 #include <string>
+
+//opencv headers
 #include "opencv2/opencv.hpp"
 #include "opencv2/xfeatures2d.hpp"
+
+//solar headers
+#include "api/features/IDescriptorsExtractor.h"
+
+//xpcf headers
+#include "xpcf/component/ComponentBase.h"
+
+#include "SolAROpencvNonFreeAPI.h"
+
 
 namespace SolAR {
 using namespace datastructure;
@@ -42,8 +53,6 @@ public:
     inline std::string getTypeString() override { return std::string("DescriptorExtractorType::SIFT") ;};
 
     void extract (const SRef<Image> image, const std::vector<SRef<Keypoint> > &keypoints, SRef<DescriptorBuffer>& descriptors) override;
-
-    XPCF_DECLARE_UUID("3787eaa6-d0a0-11e7-8fab-cec278b6b50a");
 
 private:
     cv::Ptr<cv::Feature2D> m_extractor;

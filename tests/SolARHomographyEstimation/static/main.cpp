@@ -18,8 +18,11 @@
 #include <string>
 
 // ADD COMPONENTS HEADERS HERE
-#include "SolARImageViewerOpencv.h"
+
+
 #include "SolARImageLoaderOpencv.h"
+#include "SolARImageViewerOpencv.h"
+
 #include "SolARKeypointDetectorNonFreeOpencv.h"
 #include "SolARDescriptorsExtractorSIFTOpencv.h"
 #include "SolARDescriptorMatcherKNNOpencv.h"
@@ -46,25 +49,21 @@ int run(int argc, char *argv[])
 
     // components declarations
     xpcf::utils::uuids::string_generator gen;
-    SRef<image::IImageLoader> imageLoader;
-    SRef<features::IKeypointDetector> kpDetector;
-    SRef<features::IDescriptorsExtractor> descriptorExtractor;
-    SRef<features::IDescriptorMatcher>  matcher;
-    SRef<solver::pose::I2DTransformFinder> homographyEstimation;
-    SRef<display::IImageViewer> imageViewer;
-    SRef<display::ISideBySideOverlay> overlaySBSComponent;
-    SRef<display::I2DOverlay> overlay2DComponent;
 
     // create components
     LOG_INFO("Start creating components");
-    xpcf::ComponentFactory::createComponent<SolARImageLoaderOpencv>(gen(image::IImageLoader::UUID), imageLoader);
-    xpcf::ComponentFactory::createComponent<SolARKeypointDetectorNonFreeOpencv>(gen(features::IKeypointDetector::UUID), kpDetector);
-    xpcf::ComponentFactory::createComponent<SolARDescriptorsExtractorSIFTOpencv>(gen(features::IDescriptorsExtractor::UUID), descriptorExtractor);
-    xpcf::ComponentFactory::createComponent<SolARDescriptorMatcherKNNOpencv>(gen(features::IDescriptorMatcher::UUID), matcher);
-    xpcf::ComponentFactory::createComponent<SolARHomographyEstimationOpencv>(gen(solver::pose::I2DTransformFinder::UUID), homographyEstimation);
-    xpcf::ComponentFactory::createComponent<SolARImageViewerOpencv>(gen(display::IImageViewer::UUID), imageViewer);
-    xpcf::ComponentFactory::createComponent<SolARSideBySideOverlayOpencv>(gen(display::ISideBySideOverlay::UUID), overlaySBSComponent);
-    xpcf::ComponentFactory::createComponent<SolAR2DOverlayOpencv>(gen(display::I2DOverlay::UUID), overlay2DComponent);
+
+    auto imageLoader=xpcf::ComponentFactory::createInstance<SolARImageLoaderOpencv>()->bindTo<image::IImageLoader>();
+    auto kpDetector=xpcf::ComponentFactory::createInstance<SolARKeypointDetectorNonFreeOpencv>()->bindTo<features::IKeypointDetector>();
+    auto descriptorExtractor=xpcf::ComponentFactory::createInstance<SolARDescriptorsExtractorSIFTOpencv>()->bindTo<features::IDescriptorsExtractor>();
+    auto matcher=xpcf::ComponentFactory::createInstance<SolARDescriptorMatcherKNNOpencv>()->bindTo<features::IDescriptorMatcher>();  
+
+    auto homographyEstimation=xpcf::ComponentFactory::createInstance<SolARDescriptorMatcherKNNOpencv>()->bindTo<solver::pose::I2DTransformFinder>();  
+    auto imageViewer=xpcf::ComponentFactory::createInstance<SolARImageViewerOpencv>()->bindTo<display::IImageViewer>();  
+    auto overlaySBSComponent=xpcf::ComponentFactory::createInstance<SolARSideBySideOverlayOpencv>()->bindTo<display::ISideBySideOverlay>();  
+    auto overlay2DComponent=xpcf::ComponentFactory::createInstance<SolAR2DOverlayOpencv>()->bindTo<display::I2DOverlay>();  
+
+
     LOG_INFO("All components have been created");
 
     // Declare data structures used to exchange information between components
@@ -120,7 +119,8 @@ int run(int argc, char *argv[])
     LOG_INFO("FIND HOMOGRAPHY ");
     Transform2Df Hm;
 
-    int res = homographyEstimation->find(matchedRef1Keypoints, matchedRef2Keypoints, Hm);
+    int res = homographyEstimation->find(matchedRef1Keypoints, matchedRef2Keypoints, Hm); 
+
     if (res == 0)
     {
         // vector of 4 corners in the marker

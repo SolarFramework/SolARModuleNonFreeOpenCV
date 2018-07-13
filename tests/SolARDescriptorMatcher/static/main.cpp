@@ -41,13 +41,6 @@ int run(int argc,char** argv)
 {
  // declarations
     xpcf::utils::uuids::string_generator    gen;
-    SRef<image::IImageLoader>               imageLoader1;
-    SRef<image::IImageLoader>               imageLoader2;
-    SRef<features::IKeypointDetector>       keypointsDetector;
-    SRef<features::IDescriptorsExtractor>   extractorSIFT;
-    SRef<features::IDescriptorMatcher>      matcher;
-    SRef<display::IImageViewer>             viewer;
-    SRef<display::ISideBySideOverlay>       overlay;
 
     SRef<Image>                             image1;
     SRef<Image>                             image2;
@@ -64,13 +57,14 @@ int run(int argc,char** argv)
     char escape_key = 27;
 
  // component creation
-    xpcf::ComponentFactory::createComponent<SolARImageLoaderOpencv>(gen(image::IImageLoader::UUID ), imageLoader1);
-    xpcf::ComponentFactory::createComponent<SolARImageLoaderOpencv>(gen(image::IImageLoader::UUID ), imageLoader2);
-    xpcf::ComponentFactory::createComponent<SolARKeypointDetectorOpencv>(gen(features::IKeypointDetector::UUID ), keypointsDetector);
-    xpcf::ComponentFactory::createComponent<SolARDescriptorsExtractorSIFTOpencv>(gen(features::IDescriptorsExtractor::UUID ), extractorSIFT);
-    xpcf::ComponentFactory::createComponent<SolARDescriptorMatcherKNNOpencv>(gen(features::IDescriptorMatcher::UUID ), matcher);
-    xpcf::ComponentFactory::createComponent<SolARSideBySideOverlayOpencv>(gen(display::ISideBySideOverlay::UUID ), overlay);
-    xpcf::ComponentFactory::createComponent<SolARImageViewerOpencv>(gen(display::IImageViewer::UUID ), viewer);
+    auto imageLoader1=xpcf::ComponentFactory::createInstance<SolARImageLoaderOpencv>()->bindTo<image::IImageLoader>();
+    auto imageLoader2=xpcf::ComponentFactory::createInstance<SolARImageLoaderOpencv>()->bindTo<image::IImageLoader>();
+    auto keypointsDetector=xpcf::ComponentFactory::createInstance<SolARKeypointDetectorOpencv>()->bindTo<features::IKeypointDetector>();
+    auto extractorSIFT=xpcf::ComponentFactory::createInstance<SolARDescriptorsExtractorSIFTOpencv>()->bindTo<features::IDescriptorsExtractor>();
+    auto matcher=xpcf::ComponentFactory::createInstance<SolARDescriptorMatcherKNNOpencv>()->bindTo<features::IDescriptorMatcher>();  
+    auto overlay=xpcf::ComponentFactory::createInstance<SolARSideBySideOverlayOpencv>()->bindTo<display::ISideBySideOverlay>();
+    auto viewer=xpcf::ComponentFactory::createInstance<SolARImageViewerOpencv>()->bindTo<display::IImageViewer>();
+
 
  // components initialisation
     // nothing to do

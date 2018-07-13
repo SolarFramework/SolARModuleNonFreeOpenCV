@@ -38,25 +38,22 @@ int run(int argc, char **argv)
 
     // declarations
     xpcf::utils::uuids::string_generator gen;
-    SRef<image::IImageLoader>              imageLoader;
-    SRef<features::IKeypointDetector>         keypointsDetector;
-    SRef<features::IDescriptorsExtractor>     extractorSIFT;
-    SRef<display::IImageViewer>              viewer;
-    SRef<display::I2DOverlay>                overlay;
 
     SRef<Image>                                        testImage;
-    std::vector< sptrnms::shared_ptr<Keypoint>>        keypoints;
+    std::vector< SRef<Keypoint>>        keypoints;
     SRef<DescriptorBuffer>                             descriptors;
 
     // The escape key to exit the sample
     char escape_key = 27;
 
     // component creation
-    xpcf::ComponentFactory::createComponent<SolARImageLoaderOpencv>(gen(image::IImageLoader::UUID ), imageLoader);
-    xpcf::ComponentFactory::createComponent<SolARKeypointDetectorNonFreeOpencv>(gen(features::IKeypointDetector::UUID ), keypointsDetector);
-    xpcf::ComponentFactory::createComponent<SolARDescriptorsExtractorSIFTOpencv>(gen(features::IDescriptorsExtractor::UUID ), extractorSIFT);
-    xpcf::ComponentFactory::createComponent<SolAR2DOverlayOpencv>(gen(display::I2DOverlay::UUID ), overlay);
-    xpcf::ComponentFactory::createComponent<SolARImageViewerOpencv>(gen(display::IImageViewer::UUID ), viewer);
+
+    auto imageLoader=xpcf::ComponentFactory::createInstance<SolARImageLoaderOpencv>()->bindTo<image::IImageLoader>();
+    auto keypointsDetector=xpcf::ComponentFactory::createInstance<SolARKeypointDetectorNonFreeOpencv>()->bindTo<features::IKeypointDetector>();
+    auto extractorSIFT=xpcf::ComponentFactory::createInstance<SolARDescriptorsExtractorSIFTOpencv>()->bindTo<features::IDescriptorsExtractor>();
+    auto overlay=xpcf::ComponentFactory::createInstance<SolAR2DOverlayOpencv>()->bindTo<display::I2DOverlay>();
+    auto viewer=xpcf::ComponentFactory::createInstance<SolARImageViewerOpencv>()->bindTo<display::IImageViewer>();
+
 
     // components initialisation
         // nothing to do

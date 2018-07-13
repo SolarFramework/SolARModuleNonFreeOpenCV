@@ -19,6 +19,7 @@
 #include <vector>
 
 // ADD COMPONENTS HEADERS HERE
+#include <api/solver/pose/IFundamentalMatrixEstimation.h>
 
 #include "SolARImageLoaderOpencv.h"
 #include "SolARCameraOpencv.h"
@@ -61,7 +62,7 @@ void load_2dpoints(std::string&path_file, int points_no, std::vector<SRef<Point2
        v[0]  = std::stof(dummy);
        ox>>dummy;
        v[1]= std::stof(dummy);
-       pt2d[i]  = sptrnms::make_shared<Point2Df>(v[0], v[1]);
+       pt2d[i]  = xpcf::utils::make_shared<Point2Df>(v[0], v[1]);
     }
   ox.close();
 }
@@ -70,8 +71,8 @@ int run( std::string& path_points1, std::string& path_points2,std::string& path_
 
  // declarations
     xpcf::utils::uuids::string_generator              gen;
-    SRef<solver::pose::IFundamentalMatrixEstimation>  fundamentalFinder;
-    SRef<display::IImageViewer>                       viewer;
+   
+    
     SRef<display::ISideBySideOverlay>                 overlay;
     SRef<Image>                                       image;
 
@@ -89,11 +90,18 @@ int run( std::string& path_points1, std::string& path_points2,std::string& path_
     // The escape key to exit the sample
     char escape_key = 27;
 
- // component creation
-   xpcf::ComponentFactory::createComponent<SolARImageViewerOpencv>(gen(display::IImageViewer::UUID ), viewer);
-   xpcf::ComponentFactory::createComponent<SolARFundamentalMatrixEstimationOpencv>(gen(solver::pose::IFundamentalMatrixEstimation::UUID ), fundamentalFinder);
+    // load libraries
+    SRef<xpcf::IComponentManager> xpcfComponentManagerOpenCV = xpcf::getComponentManagerInstance();
+    org::bcom::xpcf::XPCFErrorCode returnErrCode = xpcfComponentManagerOpenCV->load("$BCOMDEVROOT/.xpcf/SolAR/xpcf_SolARModuleOpenCV_registry.xml");
 
-   const int points_no = 6953;
+    SRef<xpcf::IComponentManager> xpcfComponentManagerNonFreeOpenCV = xpcf::getComponentManagerInstance();
+    org::bcom::xpcf::XPCFErrorCode returnErrCode2 = xpcfComponentManagerNonFreeOpenCV->load("$BCOMDEVROOT/.xpcf/SolAR/xpcf_SolARModuleNonFreeOpenCV_registry.xml");
+    
+    //component creation
+    SRef<display::IImageViewer> viewer = xpcfComponentManagerOpenCV->create<SolAR::MODULES::OPENCV::SolARImageViewerOpencv>()->bindTo<display::IImageViewer>();
+    SRef<SolAR::api::solver::pose::IFundamentalMatrixEstimation>  fundamentalFinder = xpcfComponentManagerOpenCV->create<SolAR::MODULES::OPENCV::SolARFundamentalMatrixEstimationOpencv>()->bindTo<solver::pose::IFundamentalMatrixEstimation>();
+   
+    const int points_no = 6953;
 
    load_2dpoints(path_points1,points_no, points_view1);
    load_2dpoints(path_points2,points_no, points_view2);

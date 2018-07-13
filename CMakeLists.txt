@@ -8,18 +8,18 @@ set (SOURCES
 		src/SolARDescriptorsExtractorSIFTOpencv.cpp
 		src/SolARDescriptorsExtractorSURF64Opencv.cpp
 		src/SolARDescriptorsExtractorSURF128Opencv.cpp
-		src/SolARModuleManagerNonFreeOpencv.cpp  
 		src/SolARKeypointDetectorNonFreeOpencv.cpp
 	)
 
-set (HEADERS
-	interfaces/SolAROpencvNonFreeAPI.h
-	interfaces/SolARDescriptorsExtractorSURF64Opencv.h
-	interfaces/SolARDescriptorsExtractorSURF128Opencv.h
-	interfaces/SolARDescriptorsExtractorSIFTOpencv.h
-	interfaces/SolARModuleManagerNonFreeOpencv.h
-	interfaces/SolARKeypointDetectorNonFreeOpencv.h
-)
+#install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/xpcf_SolARModuleNonFreeOpenCV_registry.xml" DESTINATION $ENV{BCOMDEVROOT}/.xpcf/SolAR/	)
+#set (HEADERS
+	#interfaces/SolAROpencvNonFreeAPI.h
+	#interfaces/SolARDescriptorsExtractorSURF64Opencv.h
+	#interfaces/SolARDescriptorsExtractorSURF128Opencv.h
+	#interfaces/SolARDescriptorsExtractorSIFTOpencv.h
+	#interfaces/SolARModuleManagerNonFreeOpencv.h
+	#interfaces/SolARKeypointDetectorNonFreeOpencv.h
+#)
 
 ##################################################
 
