@@ -55,8 +55,8 @@ class SOLAROPENCVNONFREE_EXPORT_API SolARDescriptorsExtractorSIFTOpencv : public
         public api::features::IDescriptorsExtractor {
 public:
     SolARDescriptorsExtractorSIFTOpencv();
-    ~SolARDescriptorsExtractorSIFTOpencv();
-    void unloadComponent () override final;
+    ~SolARDescriptorsExtractorSIFTOpencv() override;
+    void unloadComponent () final;
     inline std::string getTypeString() override { return std::string("DescriptorExtractorType::SIFT") ;};
 
     /// @brief Extracts a set of descriptors from a given image around a set of keypoints based on SIFT algorithm

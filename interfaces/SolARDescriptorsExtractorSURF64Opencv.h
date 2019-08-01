@@ -43,8 +43,8 @@ class SOLAROPENCVNONFREE_EXPORT_API SolARDescriptorsExtractorSURF64Opencv : publ
         public api::features::IDescriptorsExtractor {
 public:
     SolARDescriptorsExtractorSURF64Opencv();
-    ~SolARDescriptorsExtractorSURF64Opencv();
-    void unloadComponent () override final;
+    ~SolARDescriptorsExtractorSURF64Opencv() override;
+    void unloadComponent () final;
     inline std::string getTypeString() override { return std::string("DescriptorExtractorType::SURF64") ;};
 
     /// @brief Extracts a set of descriptors (size 64) from a given image around a set of keypoints based on SURF algorithm

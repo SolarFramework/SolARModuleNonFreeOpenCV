@@ -43,10 +43,10 @@ class SOLAROPENCVNONFREE_EXPORT_API SolARKeypointDetectorNonFreeOpencv : public 
         public IKeypointDetector {
 public:
     SolARKeypointDetectorNonFreeOpencv();
-    ~SolARKeypointDetectorNonFreeOpencv();
-    void unloadComponent () override final;
+    ~SolARKeypointDetectorNonFreeOpencv() override;
+    void unloadComponent () final;
 
-    org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
+    org::bcom::xpcf::XPCFErrorCode onConfigured() final;
 
     /// @brief Set the type of method used to detect keypoints in the image
     /// @param[in] type The type of method used to detect keypoints.
@@ -62,7 +62,7 @@ public:
     void detect (const SRef<Image> image, std::vector<Keypoint> & keypoints) override;
 
 private:
-	int m_id;
+	int m_id{};
     std::string m_type = "SURF";
     cv::Ptr<cv::Feature2D> m_detector;
     cv::KeyPointsFilter kptsFilter;

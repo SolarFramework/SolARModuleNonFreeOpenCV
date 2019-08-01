@@ -146,9 +146,9 @@ void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> image, std::ve
     }
 
 
-    kptsFilter.retainBest(kpts,m_nbDescriptors);
+    cv::KeyPointsFilter::retainBest(kpts,m_nbDescriptors);
 
-    for(std::vector<cv::KeyPoint>::iterator itr=kpts.begin();itr!=kpts.end();++itr){
+    for(auto itr=kpts.begin();itr!=kpts.end();++itr){
         Keypoint kpa = Keypoint();
 
         kpa.init((*itr).pt.x*ratioInv,(*itr).pt.y*ratioInv,(*itr).size,(*itr).angle,(*itr).response,(*itr).octave,(*itr).class_id) ;
