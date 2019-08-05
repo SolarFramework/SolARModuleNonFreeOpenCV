@@ -133,8 +133,8 @@ void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> image, std::ve
     try
     {
         if(!m_detector){
-            LOG_DEBUG(" detector is initialized with default value : {}", this->m_type)
-            setType(stringToType.at(this->m_type));
+            LOG_DEBUG(" detector is initialized with default value : {}", m_type)
+            setType(stringToType.at(m_type));
         }
         m_detector->detect(img_1, kpts, Mat());
     }
@@ -149,10 +149,7 @@ void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> image, std::ve
     cv::KeyPointsFilter::retainBest(kpts,m_nbDescriptors);
 
     for(auto itr=kpts.begin();itr!=kpts.end();++itr){
-        Keypoint kpa = Keypoint();
-
-        kpa.init((*itr).pt.x*ratioInv,(*itr).pt.y*ratioInv,(*itr).size,(*itr).angle,(*itr).response,(*itr).octave,(*itr).class_id) ;
-        keypoints.push_back(kpa);
+        keypoints.emplace_back((*itr).pt.x*ratioInv,(*itr).pt.y*ratioInv,(*itr).size,(*itr).angle,(*itr).response,(*itr).octave,(*itr).class_id);
     }
 
 }
