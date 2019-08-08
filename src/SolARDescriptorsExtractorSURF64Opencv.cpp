@@ -16,7 +16,7 @@
 
 #include "SolARDescriptorsExtractorSURF64Opencv.h"
 #include <iostream>
-#include "SolARImageConvertorOpencv.h"
+#include "SolARImageConverterOpencv.h"
 #include "SolAROpenCVHelper.h"
 #include "core/Log.h"
 #include <utility>
@@ -61,9 +61,9 @@ void SolARDescriptorsExtractorSURF64Opencv::extract(const SRef<Image> image, con
 
     if (image->getImageLayout() != Image::ImageLayout::LAYOUT_GREY) {
         // input Image not in grey levels : convert it !
-        SolARImageConvertorOpencv convertor;
+        SolARImageConverterOpencv converter;
         convertedImage = xpcf::utils::make_shared<Image>(Image::ImageLayout::LAYOUT_GREY,Image::PixelOrder::INTERLEAVED,image->getDataType());
-        convertor.convert(image,convertedImage);
+        converter.convert(image,convertedImage);
     }
 
     cv::Mat opencvImage;
