@@ -57,7 +57,7 @@ public:
     SolARDescriptorsExtractorSIFTOpencv();
     ~SolARDescriptorsExtractorSIFTOpencv() override;
     void unloadComponent () final;
-    inline std::string getTypeString() override { return std::string("DescriptorExtractorType::SIFT") ;};
+    std::string getTypeString() override { return std::string("DescriptorExtractorType::SIFT") ;};
 
     /// @brief Extracts a set of descriptors from a given image around a set of keypoints based on SIFT algorithm
     /// [in] image: source image.
