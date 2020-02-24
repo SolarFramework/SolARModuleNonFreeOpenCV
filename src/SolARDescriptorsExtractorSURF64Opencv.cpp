@@ -15,14 +15,9 @@
  */
 
 #include "SolARDescriptorsExtractorSURF64Opencv.h"
-#include <iostream>
 #include "SolARImageConvertorOpencv.h"
 #include "SolAROpenCVHelper.h"
 #include "core/Log.h"
-#include <utility>
-#include <core/Log.h>
-#include <thread>
-#include <array>
 
 //#include <boost/thread/thread.hpp>
 XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF64Opencv);
@@ -38,22 +33,30 @@ using namespace datastructure;
 namespace MODULES {
 namespace NONFREEOPENCV {
 
-SolARDescriptorsExtractorSURF64Opencv::SolARDescriptorsExtractorSURF64Opencv():ComponentBase(xpcf::toUUID<SolARDescriptorsExtractorSURF64Opencv>())
+SolARDescriptorsExtractorSURF64Opencv::SolARDescriptorsExtractorSURF64Opencv():ConfigurableBase(xpcf::toUUID<SolARDescriptorsExtractorSURF64Opencv>())
 {
-    addInterface<api::features::IDescriptorsExtractor>(this);
+    declareInterface<api::features::IDescriptorsExtractor>(this);
     LOG_DEBUG(" SolARDescriptorsExtractorSURF64Opencv constructor")
-    // m_extractor must have a default implementation : initialize default extractor type
-
-    m_extractor=SURF::create();
+    declareProperty("hessianThreshold", m_hessianThreshold);
+    declareProperty("nbOctaves", m_nbOctaves);
+    declareProperty("nbOctaveLayers", m_nbOctaveLayers);
+    declareProperty("extended", m_extended);
+    declareProperty("upright", m_upright);
 }
 
+xpcf::XPCFErrorCode SolARDescriptorsExtractorSURF64Opencv::onConfigured()
+{
+    // m_extractor must have a default implementation : initialize default extractor type
+    m_extractor=SURF::create(m_hessianThreshold,m_nbOctaves,m_nbOctaveLayers, (bool)m_extended, (bool)m_upright);
+    return xpcf::_SUCCESS;
+}
 
 SolARDescriptorsExtractorSURF64Opencv::~SolARDescriptorsExtractorSURF64Opencv()
 {
     LOG_DEBUG(" SolARDescriptorsExtractorSURF64Opencv destructor")
 }
 
-void SolARDescriptorsExtractorSURF64Opencv::extract(const SRef<Image> image, const std::vector<SRef<Keypoint> > &keypoints, SRef<DescriptorBuffer>& descriptors){
+void SolARDescriptorsExtractorSURF64Opencv::extract(const SRef<Image> image, const std::vector<Keypoint> & keypoints, SRef<DescriptorBuffer>& descriptors){
 
 
     //transform all SolAR data to openCv data
@@ -77,13 +80,13 @@ void SolARDescriptorsExtractorSURF64Opencv::extract(const SRef<Image> image, con
     {
         transform_to_data.push_back(
                     //instantiate keypoint
-                     cv::KeyPoint(keypoints[k]->getX(),
-                                  keypoints[k]->getY(),
-                                  keypoints[k]->getSize(),
-                                  keypoints[k]->getAngle(),
-                                  keypoints[k]->getResponse(),
-                                  keypoints[k]->getOctave(),
-                                  keypoints[k]->getClassId())
+                     cv::KeyPoint(keypoints[k].getX(),
+                                  keypoints[k].getY(),
+                                  keypoints[k].getSize(),
+                                  keypoints[k].getAngle(),
+                                  keypoints[k].getResponse(),
+                                  keypoints[k].getOctave(),
+                                  keypoints[k].getClassId())
                     );
     }
 
@@ -92,7 +95,8 @@ void SolARDescriptorsExtractorSURF64Opencv::extract(const SRef<Image> image, con
   // m_ex
   // enum DESCRIPTOR::TYPE desc_type = descriptors->getDescriptorType();
 
-    descriptors.reset( new DescriptorBuffer(out_mat_descps.data,DescriptorBuffer::SURF_64, DescriptorBuffer::TYPE_32F, 64, out_mat_descps.rows)) ;
+   descriptors.reset( new DescriptorBuffer(out_mat_descps.data, DescriptorType::SURF_64, DescriptorDataType::TYPE_32F, 64, out_mat_descps.rows)) ;
+
 
 }
 

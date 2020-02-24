@@ -21,7 +21,6 @@
 // Definition of SolARDescriptorExtractorOpencv Class //
 // part of SolAR namespace //
 
-#include "xpcf/component/ComponentBase.h"
 #include "SolAROpencvNonFreeAPI.h"
 #include <string>
 
@@ -33,10 +32,7 @@
 #include "api/features/IDescriptorsExtractor.h"
 
 //xpcf headers
-#include "xpcf/component/ComponentBase.h"
-
-#include "SolAROpencvNonFreeAPI.h"
-
+#include "xpcf/component/ConfigurableBase.h"
 
 namespace SolAR {
 using namespace datastructure;
@@ -51,11 +47,13 @@ namespace NONFREEOPENCV {
  *
  */
 
-class SOLAROPENCVNONFREE_EXPORT_API SolARDescriptorsExtractorSIFTOpencv : public org::bcom::xpcf::ComponentBase,
+class SOLAROPENCVNONFREE_EXPORT_API SolARDescriptorsExtractorSIFTOpencv : public org::bcom::xpcf::ConfigurableBase,
         public api::features::IDescriptorsExtractor {
 public:
     SolARDescriptorsExtractorSIFTOpencv();
     ~SolARDescriptorsExtractorSIFTOpencv();
+    org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
+
     void unloadComponent () override final;
     inline std::string getTypeString() override { return std::string("DescriptorExtractorType::SIFT") ;};
 
@@ -63,10 +61,15 @@ public:
     /// [in] image: source image.
     /// [in] keypoints: set of keypoints.
     /// [out] decsriptors: set of computed descriptors.
-    void extract (const SRef<Image> image, const std::vector<SRef<Keypoint> > &keypoints, SRef<DescriptorBuffer>& descriptors) override;
+    void extract (const SRef<Image> image, const std::vector<Keypoint> & keypoints, SRef<DescriptorBuffer>& descriptors) override;
 
 private:
     cv::Ptr<cv::Feature2D> m_extractor;
+    int m_nbFeatures = 0;
+    int m_nbOctaveLayers = 3;
+    double m_contrastThreshold = 0.04;
+    double m_edgeThreshold = 10.0;
+    double m_sigma = 1.6;
 };
 
 }

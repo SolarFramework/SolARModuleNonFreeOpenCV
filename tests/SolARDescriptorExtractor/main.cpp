@@ -38,58 +38,65 @@ int main(int argc,char** argv)
 #endif
 
     LOG_ADD_LOG_TO_CONSOLE();
+    try {
 
-    /* instantiate component manager*/
-    /* this is needed in dynamic mode */
-    SRef<xpcf::IComponentManager> xpcfComponentManager = xpcf::getComponentManagerInstance();
+        /* instantiate component manager*/
+        /* this is needed in dynamic mode */
+        SRef<xpcf::IComponentManager> xpcfComponentManager = xpcf::getComponentManagerInstance();
 
-    if(xpcfComponentManager->load("conf_DescriptorExtractor.xml")!=org::bcom::xpcf::_SUCCESS)
-    {
-        LOG_ERROR("Failed to load the configuration file conf_DescriptorExtractor.xml")
-        return -1;
-    }
-
-    // declare and create components
-    LOG_INFO("Start creating components");
-
-    SRef<image::IImageLoader> imageLoader = xpcfComponentManager->resolve<image::IImageLoader>();
-    SRef<features::IKeypointDetector> keypointsDetector = xpcfComponentManager->resolve<features::IKeypointDetector>();
-    SRef<features::IDescriptorsExtractor> extractorSIFT = xpcfComponentManager->resolve<features::IDescriptorsExtractor>();
-    SRef<display::I2DOverlay> overlay = xpcfComponentManager->resolve<display::I2DOverlay>();
-    SRef<display::IImageViewer> viewer = xpcfComponentManager->resolve<display::IImageViewer>();
-
-    if (!imageLoader  || !keypointsDetector || !extractorSIFT || !overlay || !viewer)
-    {
-        LOG_ERROR("One or more component creations have failed");
-        return -1;
-    }
-
-
-    SRef<Image>             testImage;
-    std::vector<Keypoint>   keypoints;
-    SRef<DescriptorBuffer>  descriptors;
-
-    // components initialisation
-        // nothing to do
-
-    // Start
-    if (imageLoader->getImage(testImage) != FrameworkReturnCode::_SUCCESS)
-    {
-       LOG_ERROR("Cannot load image with path {}", imageLoader->bindTo<xpcf::IConfigurable>()->getProperty("filePath")->getStringValue());
-       return -1;
-    }
-
-    keypointsDetector->detect(testImage, keypoints);
-    extractorSIFT->extract(testImage, keypoints, descriptors);
-    overlay->drawCircles(keypoints, testImage);
-
-    while (true)
-    {
-        if (viewer->display(testImage) == FrameworkReturnCode::_STOP)
+        if(xpcfComponentManager->load("SolAROpenCVNonFreeDescriptorExtractor_conf.xml")!=org::bcom::xpcf::_SUCCESS)
         {
-            LOG_INFO("end of DescriptorsExtractorOpencv test");
-            break;
+            LOG_ERROR("Failed to load the configuration file SolAROpenCVNonFreeDescriptorExtractor_conf.xml")
+            return -1;
         }
+
+        // declare and create components
+        LOG_INFO("Start creating components");
+
+        SRef<image::IImageLoader> imageLoader = xpcfComponentManager->resolve<image::IImageLoader>();
+        SRef<features::IKeypointDetector> keypointsDetector = xpcfComponentManager->resolve<features::IKeypointDetector>();
+        SRef<features::IDescriptorsExtractor> extractorSIFT = xpcfComponentManager->resolve<features::IDescriptorsExtractor>();
+        SRef<display::I2DOverlay> overlay = xpcfComponentManager->resolve<display::I2DOverlay>();
+        SRef<display::IImageViewer> viewer = xpcfComponentManager->resolve<display::IImageViewer>();
+
+        if (!imageLoader  || !keypointsDetector || !extractorSIFT || !overlay || !viewer)
+        {
+            LOG_ERROR("One or more component creations have failed");
+            return -1;
+        }
+
+
+        SRef<Image>             testImage;
+        std::vector<Keypoint>   keypoints;
+        SRef<DescriptorBuffer>  descriptors;
+
+        // components initialisation
+            // nothing to do
+
+        // Start
+        if (imageLoader->getImage(testImage) != FrameworkReturnCode::_SUCCESS)
+        {
+           LOG_ERROR("Cannot load image with path {}", imageLoader->bindTo<xpcf::IConfigurable>()->getProperty("filePath")->getStringValue());
+           return -1;
+        }
+
+        keypointsDetector->detect(testImage, keypoints);
+        extractorSIFT->extract(testImage, keypoints, descriptors);
+        overlay->drawCircles(keypoints, testImage);
+
+        while (true)
+        {
+            if (viewer->display(testImage) == FrameworkReturnCode::_STOP)
+            {
+                LOG_INFO("end of DescriptorsExtractorOpencv test");
+                break;
+            }
+        }
+    }
+    catch (xpcf::Exception e)
+    {
+        LOG_ERROR ("The following exception has been catch : {}", e.what());
+        return -1;
     }
     return 0;
 }
