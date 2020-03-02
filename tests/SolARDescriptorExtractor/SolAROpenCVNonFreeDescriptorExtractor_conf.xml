@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <xpcf-registry>
-    
-	<module uuid="15e1990b-86b2-445c-8194-0cbe80ede970" name="SolARModuleOpenCV" description="SolARModuleOpenCV" path="$BCOMDEVROOT/bcomBuild/SolARModuleOpenCV/0.6.0/lib/x86_64/shared">0
+    <module uuid="15e1990b-86b2-445c-8194-0cbe80ede970" name="SolARModuleOpenCV" description="SolARModuleOpenCV" path="$REMAKEN_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleOpenCV/0.7.0/lib/x86_64/shared">0
         <component uuid="e42d6526-9eb1-4f8a-bb68-53e06f09609c" name="SolARImageLoaderOpencv" description="SolARImageLoaderOpencv">
                 <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
                 <interface uuid="6FCDAA8D-6EA9-4C3F-97B0-46CD11B67A9B" name="IImageLoader" description="IImageLoader"/>
@@ -19,7 +18,7 @@
                 <interface uuid="b05f3dbb-f93d-465c-aee1-fb58e1480c42" name="IImageViewer" description="IImageViewer"/>
         </component>   	
     </module>
-	<module uuid="2bce6a98-2ad7-4cd5-bd63-b3ee68fb59c0" name="SolARModuleNonFreeOpenCV" description="SolARModuleNonFreeOpenCV"  path="$BCOMDEVROOT/bcomBuild/SolARModuleNonFreeOpenCV/0.6.0/lib/x86_64/shared">
+    <module uuid="2bce6a98-2ad7-4cd5-bd63-b3ee68fb59c0" name="SolARModuleNonFreeOpenCV" description="SolARModuleNonFreeOpenCV"  path="$REMAKEN_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleNonFreeOpenCV/0.7.0/lib/x86_64/shared">
         <component uuid="d1f9317c-9519-4671-8ff5-4629773544f2" name="SolARKeypointDetectorNonFreeOpencv" description="SolARKeypointDetectorNonFreeOpencv">
                 <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
                 <interface uuid="0eadc8b7-1265-434c-a4c6-6da8a028e06e" name="IKeypointDetector" description="IKeypointDetector"/>
@@ -28,38 +27,38 @@
                 <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
                 <interface uuid="c0e49ff1-0696-4fe6-85a8-9b2c1e155d2e" name="IDescriptorsExtractor" description="IDescriptorsExtractor"/>
         </component>
-    </module>
-	
-	<configuration>
-		<component uuid="e42d6526-9eb1-4f8a-bb68-53e06f09609c"> <!-- SolARImageLoaderOpencv -->
-			<property name="filePath" type="string" value="../data/graf1.png"/>
-		</component>
-		<component uuid="d1f9317c-9519-4671-8ff5-4629773544f2"> <!-- SolARKeypointDetectorOpencv -->
-			<property name="type" type="string" value="SIFT"/>
-			<property name="imageRatio" type="Float" value="1.0"/>
-			<property name="nbDescriptors" type="Integer" value="1000"/>
-        </component>
-		<component uuid="3787eaa6-d0a0-11e7-8fab-cec278b6b50a"> <!-- SolARDescriptorsExtractorAKAZE2Opencv -->
-            <property name="threshold" type="Float" value="3e-4"/>
-        </component>
-		<component uuid="d67ce1ba-04a5-43bc-a0f8-e0c3653b32c9"> <!-- SolARDescriptorMatcherHammingBruteForceOpencv -->
-			<property name="distanceRatio" type="Float" value="0.9"/>
-		</component>
-		<component uuid="cc51d685-9797-4ffd-a9dd-cec4f367fa6a"> <!-- SolAR2DOverlayOpencv -->
-            <property name="thickness" type="UnsignedInteger" value="2"/>
-			<property name="radius" type="UnsignedInteger" value="5"/>
-			<property name="randomColor" type="UnsignedInteger" value="1"/>
-			<property name="color"  type="UnsignedInteger">
-				<value>0</value>
-				<value>0</value>
-				<value>255</value>
-			</property>	
-        </component>
-		<component uuid="19ea4e13-7085-4e3f-92ca-93f200ffb01b"> <!-- SolARImageViewerOpencv -->
-			<property name="title" type="string" value="Keypoints (press esc key to exit)"/>
-			<property name="exitKey" type="Integer" value="27"/>
-			<property name="width" type="Integer" value="0"/>
-			<property name="height" type="Integer" value="0"/>
-		</component>	
+    </module>	
+    <configuration>
+            <component uuid="e42d6526-9eb1-4f8a-bb68-53e06f09609c"> <!-- SolARImageLoaderOpencv -->
+                    <property name="filePath" type="string" value="../../data/graf1.png"/>
+            </component>
+            <component uuid="d1f9317c-9519-4671-8ff5-4629773544f2"> <!-- SolARKeypointDetectorOpencv -->
+                    <property name="type" type="string" value="SIFT"/>
+                    <property name="imageRatio" type="Float" value="1.0"/>
+                    <property name="nbDescriptors" type="Integer" value="1000"/>
+    </component>
+            <component uuid="3787eaa6-d0a0-11e7-8fab-cec278b6b50a"> <!-- SolARDescriptorsExtractorSIFTOpencv -->
+        <property name="nbFeatures" type="Double" value="0"/>
+                    <property name="nbOctaveLayers" type="Integer" value="3"/>
+                    <property name="contrastThreshold" type="Double" value="0.04"/>
+                    <property name="edgeThreshold" type="Double" value="10.0"/>
+                    <property name="sigma" type="Double" value="1.6"/>
+    </component>
+            <component uuid="cc51d685-9797-4ffd-a9dd-cec4f367fa6a"> <!-- SolAR2DOverlayOpencv -->
+        <property name="thickness" type="UnsignedInteger" value="2"/>
+                    <property name="radius" type="UnsignedInteger" value="5"/>
+                    <property name="randomColor" type="UnsignedInteger" value="1"/>
+                    <property name="color"  type="UnsignedInteger">
+                            <value>0</value>
+                            <value>0</value>
+                            <value>255</value>
+                    </property>
+    </component>
+            <component uuid="19ea4e13-7085-4e3f-92ca-93f200ffb01b"> <!-- SolARImageViewerOpencv -->
+                    <property name="title" type="string" value="Keypoints (press esc key to exit)"/>
+                    <property name="exitKey" type="Integer" value="27"/>
+                    <property name="width" type="Integer" value="0"/>
+                    <property name="height" type="Integer" value="0"/>
+            </component>
     </configuration>
 </xpcf-registry>
