@@ -49,21 +49,19 @@ namespace NONFREEOPENCV {
 
 
 
-static std::map<std::string,KeypointDetectorType> stringToType = {{"SURF",KeypointDetectorType::SURF},
-                                                                  {"SIFT",KeypointDetectorType::SIFT}};
+static std::map<std::string,IKeypointDetector::KeypointDetectorType> stringToType = {{"SURF",IKeypointDetector::KeypointDetectorType::SURF},
+                                                                  {"SIFT",IKeypointDetector::KeypointDetectorType::SIFT}};
 
-static std::map<KeypointDetectorType,std::string> typeToString = {{KeypointDetectorType::SURF, "SURF"},
-                                                                  {KeypointDetectorType::SIFT, "SIFT"}};
+static std::map<IKeypointDetector::KeypointDetectorType,std::string> typeToString = {{IKeypointDetector::KeypointDetectorType::SURF, "SURF"},
+                                                                  {IKeypointDetector::KeypointDetectorType::SIFT, "SIFT"}};
 
 
 SolARKeypointDetectorNonFreeOpencv::SolARKeypointDetectorNonFreeOpencv():ConfigurableBase(xpcf::toUUID<SolARKeypointDetectorNonFreeOpencv>())
 {
     addInterface<api::features::IKeypointDetector>(this);
-
-    SRef<xpcf::IPropertyMap> params = getPropertyRootNode();
-    params->wrapFloat("imageRatio", m_imageRatio);
-    params->wrapInteger("nbDescriptors", m_nbDescriptors);
-    params->wrapString("type", m_type);
+    declareProperty("imageRatio", m_imageRatio);
+    declareProperty("nbDescriptors", m_nbDescriptors);
+    declareProperty("type", m_type);
     LOG_DEBUG("SolARKeypointDetectorOpencv constructor");
 }
 
@@ -108,12 +106,12 @@ void SolARKeypointDetectorNonFreeOpencv::setType(KeypointDetectorType type)
     }
 }
 
-KeypointDetectorType SolARKeypointDetectorNonFreeOpencv::getType()
+IKeypointDetector::KeypointDetectorType SolARKeypointDetectorNonFreeOpencv::getType()
 {
     return stringToType.at(m_type);
 }
 
-void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> &image, std::vector<SRef<Keypoint>> &keypoints)
+void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> image, std::vector<Keypoint> & keypoints)
 {
     std::vector<cv::KeyPoint> kpts;
 
@@ -151,9 +149,9 @@ void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> &image, std::v
     kptsFilter.retainBest(kpts,m_nbDescriptors);
 
     for(std::vector<cv::KeyPoint>::iterator itr=kpts.begin();itr!=kpts.end();++itr){
-        SRef<Keypoint> kpa = xpcf::utils::make_shared<Keypoint>();
+        Keypoint kpa = Keypoint();
 
-        kpa->init((*itr).pt.x*ratioInv,(*itr).pt.y*ratioInv,(*itr).size,(*itr).angle,(*itr).response,(*itr).octave,(*itr).class_id) ;
+        kpa.init((*itr).pt.x*ratioInv,(*itr).pt.y*ratioInv,(*itr).size,(*itr).angle,(*itr).response,(*itr).octave,(*itr).class_id) ;
         keypoints.push_back(kpa);
     }
 

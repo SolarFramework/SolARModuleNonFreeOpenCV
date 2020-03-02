@@ -7,6 +7,13 @@
 
 namespace SolAR {
 namespace MODULES {
+/**
+ * @namespace SolAR::MODULES::NONFREEOPENCV
+ * @brief <B>Provides a set of computer vision components based on OpenCV library (opencv_contrib): https://opencv.org/</B>
+ * <B> Warining, the code source of openCV used for this module is not free !</B>
+ * <TT>UUID: 28b89d39-41bd-451d-b19e-d25a3d7c5797</TT>
+ *
+ */
 namespace NONFREEOPENCV {
 
 class SolARDescriptorsExtractorSIFTOpencv;
