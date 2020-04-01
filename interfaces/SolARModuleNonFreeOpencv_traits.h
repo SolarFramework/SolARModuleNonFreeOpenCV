@@ -16,13 +16,20 @@ namespace MODULES {
  */
 namespace NONFREEOPENCV {
 
+class SolARDescriptorsExtractorBinaryOpencv;
 class SolARDescriptorsExtractorSIFTOpencv;
 class SolARDescriptorsExtractorSURF128Opencv;
 class SolARDescriptorsExtractorSURF64Opencv;
+class SolARKeylineDetectorOpencv;
 class SolARKeypointDetectorNonFreeOpencv;
 }
 }
 }
+
+XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorBinaryOpencv,
+                             "ccf87cfe-446e-4bc2-8e79-c2eee71dbf4d",
+                             "SolARDescriptorsExtractorBinaryOpencv",
+                             "Extracts the Binary descriptors for a set of keylines.")
 
 XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSIFTOpencv,
                              "3787eaa6-d0a0-11e7-8fab-cec278b6b50a",
@@ -38,6 +45,11 @@ XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtr
                              "1a437804-d0a3-11e7-8fab-cec278b6b50a",
                              "SolARDescriptorsExtractorSURF64Opencv",
                              "Extracts the SURF descriptors (size 64) for a set of keypoints.")
+
+XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARKeylineDetectorOpencv,
+                             "be7c9a63-844e-42e2-8efb-e4848f94fbeb",
+                             "SolARKeylineDetectorOpencv",
+                             "Detects keylines in an image.")
 
 XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARKeypointDetectorNonFreeOpencv,
                              "d1f9317c-9519-4671-8ff5-4629773544f2",
