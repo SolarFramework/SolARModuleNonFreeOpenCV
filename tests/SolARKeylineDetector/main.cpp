@@ -5,12 +5,11 @@
 
 #include "SolARModuleOpencv_traits.h"
 
-#include "api/image/IImageLoader.h"
-#include "api/input/devices/ICamera.h"
-#include "api/features/IDescriptorsExtractorBinary.h"
-#include "api/features/IKeylineDetector.h"
 #include "api/display/I2DOverlay.h"
 #include "api/display/IImageViewer.h"
+#include "api/features/IKeylineDetector.h"
+#include "api/image/IImageLoader.h"
+#include "api/input/devices/ICamera.h"
 
 #include "SolAROpenCVHelper.h"
 
@@ -53,7 +52,6 @@ int main(int argc, char *argv[])
 		SRef<input::devices::ICamera> camera = xpcfComponentManager->resolve<input::devices::ICamera>();
 		SRef<image::IImageLoader> imageLoader = xpcfComponentManager->resolve<image::IImageLoader>();
 		SRef<features::IKeylineDetector> keylineDetector = xpcfComponentManager->resolve<features::IKeylineDetector>();
-		SRef<features::IDescriptorsExtractorBinary> descriptorsExtractor = xpcfComponentManager->resolve<features::IDescriptorsExtractorBinary>();
 		SRef<display::I2DOverlay> overlay = xpcfComponentManager->resolve<display::I2DOverlay>();
 		SRef<display::IImageViewer> viewer = xpcfComponentManager->resolve<display::IImageViewer>();
 
@@ -62,34 +60,29 @@ int main(int argc, char *argv[])
 		SRef<Image> image;
 		cv::Mat opencvImage;
 		std::vector<Keyline> keylines;
-		SRef<DescriptorBuffer> descriptors;
 
 #ifdef WEBCAM
+		// Init camera
 		if (camera->start() != FrameworkReturnCode::_SUCCESS)
 		{
 			LOG_ERROR("Camera cannot start");
 			return -1;
 		}
-
 		int count = 0;
 		clock_t start, end;
 		start = clock();
-
+		// Main loop, press escape key to exit
 		while (true)
 		{
+			// Read image from camera
 			if (camera->getNextImage(image) == FrameworkReturnCode::_ERROR_)
 				break;
 			count++;
-
-			// Keyline detection
+			// Detect keylines in image
 			keylineDetector->detect(image, keylines);
+			// Draw detected keylines
 			overlay->drawLines(keylines, image);
-			// Descriptors extraction
-			descriptorsExtractor->extract(image, keylines, descriptors);
-
-			cv::Ptr<cv::line_descriptor::BinaryDescriptorMatcher> matcher = cv::line_descriptor::BinaryDescriptorMatcher::createBinaryDescriptorMatcher();
-
-
+			// Display the image with matches in a viewer. If escape key is pressed, exit the loop.
 			if (viewer->display(image) == FrameworkReturnCode::_STOP)
 			{
 				LOG_INFO("End of SolARKeylineDetector test");
@@ -103,27 +96,18 @@ int main(int argc, char *argv[])
 #else
 		if (imageLoader->getImage(image) !=  FrameworkReturnCode::_SUCCESS)
 		{
-			LOG_WARNING("Image can't be loaded", imageLoader->bindTo<xpcf::IConfigurable>()->getProperty("filePath")->getStringValue());
+			LOG_WARNING("Image ({}) can't be loaded", imageLoader->bindTo<xpcf::IConfigurable>()->getProperty("filePath")->getStringValue());
 			return 0;
 		}
-
-        keylineDetector->detect(image, keylines);
-        LOG_DEBUG("Detected {} keylines", keylines.size());
-        overlay->drawLines(keylines, image);
-        LOG_DEBUG("Lines drawn");
-		// Descriptors extraction
-		descriptorsExtractor->extract(image, keylines, descriptors);
-		LOG_DEBUG("descriptors extracted")
-
+		// Detect keylines in image
+		keylineDetector->detect(image, keylines);
+		// Draw detected keylines
+		overlay->drawLines(keylines, image);
+        // Display the image with matches in a viewer. If escape key is pressed, exit the loop.
         while (true)
-        {
-                // Display the image with matches in a viewer. If escape key is pressed, exit the loop.
-                if (viewer->display(image) == FrameworkReturnCode::_STOP)
-                {
-                        LOG_INFO("End of SolARKeylineDetector test");
-                        break;
-                }
-        }
+            if (viewer->display(image) == FrameworkReturnCode::_STOP)
+                break;
+        LOG_INFO("End of SolARKeylineDetector test");
 #endif
 	}
 	catch (xpcf::Exception &e)

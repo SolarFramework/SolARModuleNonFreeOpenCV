@@ -16,6 +16,7 @@ namespace MODULES {
  */
 namespace NONFREEOPENCV {
 
+class SolARDescriptorMatcherBinaryOpencv;
 class SolARDescriptorsExtractorBinaryOpencv;
 class SolARDescriptorsExtractorSIFTOpencv;
 class SolARDescriptorsExtractorSURF128Opencv;
@@ -25,6 +26,11 @@ class SolARKeypointDetectorNonFreeOpencv;
 }
 }
 }
+
+XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorMatcherBinaryOpencv,
+							 "5b2a6059-e704-4196-aa6d-b7066243c308",
+							 "SolARDescriptorMatcherBinaryOpencv",
+							 "Matches two sets of binary descriptors.")
 
 XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorBinaryOpencv,
                              "ccf87cfe-446e-4bc2-8e79-c2eee71dbf4d",

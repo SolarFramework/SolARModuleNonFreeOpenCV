@@ -99,7 +99,6 @@ void SolARKeylineDetectorOpencv::detect(const SRef<Image> image, std::vector<Key
 	cv::Mat opencvImage = SolAROpenCVHelper::mapToOpenCV(image);
 
 	cv::Mat img_1;
-    //cv::cvtColor(opencvImage, img_1, cv::COLOR_BGR2GRAY);
 	cv::resize(opencvImage, img_1, cv::Size(opencvImage.cols * m_imageRatio, opencvImage.rows * m_imageRatio), 0, 0);
 
 	std::vector<cv::line_descriptor::KeyLine> cvKeylines;
@@ -134,10 +133,10 @@ void SolARKeylineDetectorOpencv::detect(const SRef<Image> image, std::vector<Key
 			cvKeylines[i].getEndPointInOctave().x * ratioInv,
 			cvKeylines[i].getEndPointInOctave().y * ratioInv,
 			cvKeylines[i].lineLength * ratioInv,
-			cvKeylines[i].numOfPixels * ratioInv,
 			cvKeylines[i].size * ratioInv,
 			cvKeylines[i].angle,
 			cvKeylines[i].response,
+			cvKeylines[i].numOfPixels * ratioInv,
 			cvKeylines[i].octave,
 			cvKeylines[i].class_id
 		);

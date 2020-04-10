@@ -23,10 +23,6 @@
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="e60589f3-46fe-40c3-b624-389e08682751" name="IKeylineDetector" description="IKeylineDetector"/>
         </component>
-        <component uuid="ccf87cfe-446e-4bc2-8e79-c2eee71dbf4d" name="SolARDescriptorsExtractorBinaryOpencv" description="SolARDescriptorsExtractorBinaryOpencv">
-            <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
-            <interface uuid="9171561b-e957-403b-8991-f84022672780" name="IDescriptorsExtractorBinary" description="IDescriptorsExtractorBinary"/>
-        </component>
     </module>
     <properties>
         <configure component="SolARCameraOpencv"> <!-- SolARCameraOpencv -->
@@ -38,15 +34,10 @@
         </configure>
         <configure component="SolARKeylineDetectorOpencv"> <!-- SolARKeylineDetectorOpencv -->
             <property name="type" type="string" value="LSD"/>
-            <property name="imageRatio" type="Float" value="1.0"/>
+            <property name="imageRatio" type="Float" value="0.5"/>
             <property name="nbDescriptors" type="Integer" value="1000"/>
             <property name="scale" type="Integer" value="2"/>
-            <property name="numOctave" type="Integer" value="2"/>
-        </configure>
-        <configure component="SolARDescriptorsExtractorBinaryOpencv"> <!-- SolARDescriptorsExtractorBinaryOpencv -->
-            <property name="scale" type="Integer" value="2"/>
-            <property name="numOctave" type="Integer" value="2"/>
-            <property name="widthOfBand" type="Integer" value="7"/>
+            <property name="numOctave" type="Integer" value="1"/>
         </configure>
         <configure component="SolAR2DOverlayOpencv"> <!-- SolAR2DOverlayOpencv -->
             <property name="thickness" type="UnsignedInteger" value="1"/>
@@ -57,7 +48,6 @@
                 <value>255</value>
                 <value>0</value>
             </property>
-            <property name="maxMatches" type="UnsignedInteger" value="-1"/>
         </configure>
         <configure component="SolARImageViewerOpencv"> <!-- SolARImageViewerOpencv -->
             <property name="title" type="string" value="LSD Line Detector (press esc key to exit)"/>

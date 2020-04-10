@@ -50,17 +50,28 @@ public:
 	org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
 	void unloadComponent() override final;
 	
-	/// @brief Extracts a set of descriptors from a given image around a set of keylines.
-	/// [in] image: source image.
-	/// [in] keylines: set of keylines.
-	/// [out] descriptors: set of computed descriptors.
+	/// @brief Extracts the descriptors for a set of keylines
+	/// @param[in] image The image on which the keylines have been detected
+	/// @param[int] keylines The set of keylines on which the descriptors are extracted
+	/// @param[out] descriptors The extracted descriptors. The nth descriptor corresponds to the nth keyline of the second argument.
 	void extract(const SRef<Image> image,
-				 const std::vector< Keyline > &keylines,
+				 const std::vector<Keyline> & keylines,
+				 SRef<DescriptorBuffer> & descriptors) override;
+
+	/// @brief Detects keyliens and extracts the corresponding descriptors
+	/// @param[in] image The image on which the keylines have been detected
+	/// @param[out] keylines The set of detected keylines on which the descriptors are extracted
+	/// @param[out] descriptors The extracted descriptors. The nth descriptor corresponds to the nth keyline of the second argument.
+	void compute(const SRef<Image> image,
+				 std::vector<Keyline> & keylines,
 				 SRef<DescriptorBuffer> & descriptors) override;
 
 private:
+	cv::Ptr<cv::line_descriptor::LSDDetector> m_detector;
 	cv::Ptr<cv::line_descriptor::BinaryDescriptor> m_extractor;
 
+	std::string m_type = "BINARY";
+	float m_imageRatio = 1.0;
 	int m_scale = 2;
 	int m_numOctave = 1;
 	int m_widthOfBand = 7;
