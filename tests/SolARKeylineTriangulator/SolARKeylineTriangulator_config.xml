@@ -76,7 +76,7 @@
             <interface uuid="9171561b-e957-403b-8991-f84022672780" name="IDescriptorsExtractorBinary" description="IDescriptorsExtractorBinary"/>
         </component>
     </module>
-    <module uuid="28b89d39-41bd-451d-b19e-d25a3d7c5797" name="SolARModuleTools"  description="SolARModuleTools"  path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleTools/0.7.0/lib/x86_64/shared">
+    <module uuid="28b89d39-41bd-451d-b19e-d25a3d7c5797" name="SolARModuleTools"  description="SolARModuleTools"  path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleTools/0.8.0/lib/x86_64/shared">
         <component uuid="6fed0169-4f01-4545-842a-3e2425bee248" name="SolARImage2WorldMapper4Marker2D" description="SolARImage2WorldMapper4Marker2D">
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="67bcd080-258d-4b16-b693-cd30c013eb05" name="IImage2WorldMapper" description="IImage2WorldMapper"/>
@@ -92,16 +92,22 @@
             <interface uuid="575d365a-9a27-11e8-9eb6-529269fb1459" name="I3DPointsViewer" description="I3DPointsViewer"/>
         </component>
     </module>
+    <module uuid="8f94a3c5-79ed-4851-9502-98033eae3a3b" name="SolARModuleG2O" description="SolARModuleG2O" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleG2O/0.8.0/lib/x86_64/shared">
+        <component uuid="870d89ba-bb5f-460a-a817-1fcb6473df70" name="SolAROptimizationG2O" description="SolAROptimizationG2O">
+            <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
+            <interface uuid="35b9bdb7-d23c-4909-984f-ae7f9a292e6c" name="IBundler" description="IBundler"/>
+        </component>
+    </module>
     <properties>
         <configure component="SolARCameraOpencv"> <!-- SolARCameraOpencv -->
             <property name="calibrationFile" type="string" value="../../data/camera_calibration.yml" description="path of the .yml file describing the calibration parameter of the camera."/>
             <property name="deviceID" type="UnsignedInteger" value="0" description="ID of the camera (default = 0)"/>
         </configure>
         <configure component="SolARDescriptorsExtractorBinaryOpencv">
-            <property name="type" type="string" value="BINARY"/>
+            <property name="type" type="string" value="LSD"/>
             <property name="imageRatio" type="Float" value="1.0"/>
             <property name="scale" type="Integer" value="2"/>
-            <property name="numOctave" type="Integer" value="1"/>
+            <property name="numOctave" type="Integer" value="2"/>
             <property name="widthOfBand" type="Integer" value="7"/>
         </configure>
         <configure component="SolARDescriptorMatcherBinaryOpencv">
@@ -189,6 +195,11 @@
                 <value>255</value>
                 <value>0</value>
             </property>
+            <property name="points2Color" type="UnsignedInteger">
+                <value>255</value>
+                <value>0</value>
+                <value>0</value>
+            </property>
             <property name="cameraColor" type="UnsignedInteger">
                 <value>255</value>
                 <value>255</value>
@@ -213,6 +224,11 @@
             </property>
             <property name="zoomSensitivity" type="Float" value="10.0"/>
             <property name="exitKey" type="Integer" value="27"/>
+        </configure>
+        <configure component="SolAROptimizationG2O">
+            <property name="nbIterations" type="Integer" value="10"/>
+            <property name="setVerbose" type="Integer" value="0"/>
+            <property name="nbMaxFixedKeyframes" type="Integer" value="30"/>
         </configure>
     </properties>
 </xpcf-registry>
