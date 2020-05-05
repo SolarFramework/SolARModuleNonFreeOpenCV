@@ -3,11 +3,10 @@ QT       -= core gui
 CONFIG -= qt
 
 ## global definitions : target lib name, version
-INSTALLSUBDIR = SolARBuild
 TARGET = SolARModuleNonFreeOpenCV
 
 FRAMEWORK = $$TARGET
-VERSION=0.8.0
+VERSION=0.8.1
 
 DEFINES += MYVERSION=$${VERSION}
 DEFINES += TEMPLATE_LIBRARY
@@ -24,13 +23,10 @@ CONFIG(release,debug|release) {
     DEFINES += NDEBUG=1
 }
 
-DEPENDENCIESCONFIG = shared recursive install_recurse
 
-## Configuration for Visual Studio to install binaries and dependencies. Work also for QT Creator by replacing QMAKE_INSTALL
-PROJECTCONFIG = QTVS
+DEPENDENCIESCONFIG = shared recurse
 
-#NOTE : CONFIG as staticlib or sharedlib, DEPENDENCIESCONFIG as staticlib or sharedlib, QMAKE_TARGET.arch and PROJECTDEPLOYDIR MUST BE DEFINED BEFORE templatelibconfig.pri inclusion
-include ($$shell_quote($$shell_path($$(REMAKEN_RULES_ROOT)/qmake/templatelibconfig.pri)))  # Shell_quote & shell_path required for visual on windows
+include (../builddefs/qmake/templatelibconfig.pri)
 
 ## DEFINES FOR MSVC/INTEL C++ compilers
 msvc {
@@ -39,7 +35,18 @@ DEFINES += "_BCOM_SHARED=__declspec(dllexport)"
 
 INCLUDEPATH += interfaces/
 
-include (SolARModuleNonFreeOpenCV.pri)
+HEADERS += interfaces/SolAROpencvNonFreeAPI.h \
+interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
+interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
+interfaces/SolARDescriptorsExtractorSIFTOpencv.h \
+interfaces/SolARKeypointDetectorNonFreeOpencv.h \
+    interfaces/SolARModuleNonFreeOpencv_traits.h
+
+SOURCES += src/SolARModuleNonFreeOpencv.cpp \
+    src/SolARDescriptorsExtractorSIFTOpencv.cpp \
+    src/SolARDescriptorsExtractorSURF64Opencv.cpp \
+    src/SolARDescriptorsExtractorSURF128Opencv.cpp \
+    src/SolARKeypointDetectorNonFreeOpencv.cpp
  
 unix {
 }
@@ -68,9 +75,3 @@ xpcf_xml_files.files=$$files($${PWD}/xpcf*.xml)
 
 INSTALLS += header_files
 INSTALLS += xpcf_xml_files
-
-OTHER_FILES += \
-    packagedependencies.txt
-
-#NOTE : Must be placed at the end of the .pro
-include ($$shell_quote($$shell_path($$(REMAKEN_RULES_ROOT)/qmake/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows
