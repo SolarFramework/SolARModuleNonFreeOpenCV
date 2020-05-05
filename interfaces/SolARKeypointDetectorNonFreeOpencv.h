@@ -33,6 +33,12 @@ using namespace api::features;
 namespace MODULES {
 namespace NONFREEOPENCV {
 
+/** @class SolARKeypointDetectorNonFreeOpencv
+  * @brief <B>Detects keypoints in an image (based on SIFT or SURF algorithm).</B>
+  * <TT>UUID: d1f9317c-9519-4671-8ff5-4629773544f2</TT>
+  *
+  */
+
 class SOLAROPENCVNONFREE_EXPORT_API SolARKeypointDetectorNonFreeOpencv : public org::bcom::xpcf::ConfigurableBase,
         public IKeypointDetector {
 public:
@@ -42,11 +48,18 @@ public:
 
     org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
 
-    void setType(KeypointDetectorType type);
+    /// @brief Set the type of method used to detect keypoints in the image
+    /// @param[in] type The type of method used to detect keypoints.
+    void setType(KeypointDetectorType type) override;
 
-    KeypointDetectorType  getType();
+    /// @brief Get the type of method used to detect keypoints in the image
+    /// @return The type of method used to detect keypoints.
+    KeypointDetectorType  getType() override;
  
-    void detect (const SRef<Image> &image, std::vector<SRef<Keypoint>> &keypoints);
+    /// @brief This method detects keypoints in an input Image
+    /// @param[in] image input image on which we are extracting keypoints.
+    /// @param[out] keypoints The keypoints detected from the image passed as first argument.
+    void detect (const SRef<Image> image, std::vector<Keypoint> & keypoints) override;
 
 private:
 	int m_id;

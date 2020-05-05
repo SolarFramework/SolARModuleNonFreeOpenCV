@@ -55,9 +55,21 @@
 .vs*
 x64*
 
+# documentation
+doc/
+doxygen/
+
 *.log
 *.tlog
 *.TMP
 *.tmp
 
+tests/bin
 
+build/
+
+*InstallDependencies.bat
+*debug.bat
+*release.bat
+*remakeninfo.txt
+*.pc

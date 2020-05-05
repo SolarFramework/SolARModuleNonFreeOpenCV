@@ -21,7 +21,7 @@
 // Definition of SolARDescriptorExtractorOpencv Class //
 // part of SolAR namespace //
 
-#include "xpcf/component/ComponentBase.h"
+#include "xpcf/component/ConfigurableBase.h"
 #include "SolAROpencvNonFreeAPI.h"
 #include <string>
 #include "opencv2/opencv.hpp"
@@ -32,18 +32,35 @@ using namespace datastructure;
 namespace MODULES {
 namespace NONFREEOPENCV {
 
-class SOLAROPENCVNONFREE_EXPORT_API SolARDescriptorsExtractorSURF64Opencv : public org::bcom::xpcf::ComponentBase,
+/**
+ * @class SolARDescriptorsExtractorSURF64Opencv
+ * @brief <B>Extracts the SURF descriptors (size 64) for a set of keypoints.</B>
+ * <TT>UUID: 1a437804-d0a3-11e7-8fab-cec278b6b50a</TT>
+ *
+ */
+
+class SOLAROPENCVNONFREE_EXPORT_API SolARDescriptorsExtractorSURF64Opencv : public org::bcom::xpcf::ConfigurableBase,
         public api::features::IDescriptorsExtractor {
 public:
     SolARDescriptorsExtractorSURF64Opencv();
     ~SolARDescriptorsExtractorSURF64Opencv();
+    org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
     void unloadComponent () override final;
     inline std::string getTypeString() override { return std::string("DescriptorExtractorType::SURF64") ;};
 
-    void extract(const SRef<Image> image, const std::vector<SRef<Keypoint> > &keypoints, SRef<DescriptorBuffer>& descriptors) override;
+    /// @brief Extracts a set of descriptors (size 64) from a given image around a set of keypoints based on SURF algorithm
+    /// [in] image: source image.
+    /// [in] keypoints: set of keypoints.
+    /// [out] decsriptors: set of computed descriptors.
+    void extract(const SRef<Image> image, const std::vector<Keypoint> & keypoints, SRef<DescriptorBuffer>& descriptors) override;
 
 private:
     cv::Ptr<cv::Feature2D> m_extractor;
+    double m_hessianThreshold = 100.0f; // Threshold for hessian keypoint detector used in SURF.
+    int m_nbOctaves = 4;                // Number of pyramid octaves the keypoint detector will use.
+    int m_nbOctaveLayers = 3;           // Number of octave layers within each octave.
+    int m_extended = 0;              // Extended descriptor flag (1 - use extended 128-element descriptors; 0 - use 64-element descriptors).
+    int m_upright = 0;               // Up-right or rotated features flag (1 - do not compute orientation of features; 0 - compute orientation).
 };
 
 }

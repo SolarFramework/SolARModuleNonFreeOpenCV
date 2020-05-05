@@ -3,15 +3,15 @@ QT       -= core gui
 CONFIG -= qt
 
 ## global definitions : target lib name, version
+INSTALLSUBDIR = SolARBuild
 TARGET = SolARModuleNonFreeOpenCV
-INSTALLSUBDIR = bcomBuild
+
 FRAMEWORK = $$TARGET
-VERSION=0.5.3
+VERSION=0.8.0
 
 DEFINES += MYVERSION=$${VERSION}
 DEFINES += TEMPLATE_LIBRARY
-CONFIG += Cpp11
-CONFIG += c++11
+CONFIG += c++1z
 
 
 CONFIG(debug,debug|release) {
@@ -24,11 +24,13 @@ CONFIG(release,debug|release) {
     DEFINES += NDEBUG=1
 }
 
+DEPENDENCIESCONFIG = shared recursive install_recurse
 
-PROJECTDEPLOYDIR = $$(BCOMDEVROOT)/$${INSTALLSUBDIR}/$${FRAMEWORK}/$${VERSION}
-DEPENDENCIESCONFIG = shared
+## Configuration for Visual Studio to install binaries and dependencies. Work also for QT Creator by replacing QMAKE_INSTALL
+PROJECTCONFIG = QTVS
 
-include ($$(BCOMDEVROOT)/builddefs/qmake/templatelibconfig.pri)
+#NOTE : CONFIG as staticlib or sharedlib, DEPENDENCIESCONFIG as staticlib or sharedlib, QMAKE_TARGET.arch and PROJECTDEPLOYDIR MUST BE DEFINED BEFORE templatelibconfig.pri inclusion
+include ($$shell_quote($$shell_path($$(REMAKEN_RULES_ROOT)/qmake/templatelibconfig.pri)))  # Shell_quote & shell_path required for visual on windows
 
 ## DEFINES FOR MSVC/INTEL C++ compilers
 msvc {
@@ -37,18 +39,7 @@ DEFINES += "_BCOM_SHARED=__declspec(dllexport)"
 
 INCLUDEPATH += interfaces/
 
-HEADERS += interfaces/SolAROpencvNonFreeAPI.h \
-interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
-interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
-interfaces/SolARDescriptorsExtractorSIFTOpencv.h \
-interfaces/SolARKeypointDetectorNonFreeOpencv.h \
-    interfaces/SolARModuleNonFreeOpencv_traits.h
-
-SOURCES += src/SolARModuleNonFreeOpencv.cpp \
-    src/SolARDescriptorsExtractorSIFTOpencv.cpp \
-    src/SolARDescriptorsExtractorSURF64Opencv.cpp \
-    src/SolARDescriptorsExtractorSURF128Opencv.cpp \
-    src/SolARKeypointDetectorNonFreeOpencv.cpp
+include (SolARModuleNonFreeOpenCV.pri)
  
 unix {
 }
@@ -72,8 +63,14 @@ win32 {
 header_files.path = $${PROJECTDEPLOYDIR}/interfaces
 header_files.files = $$files($${PWD}/interfaces/*.h*)
 
-xpcf_xml_files.path = $$(BCOMDEVROOT)/.xpcf/SolAR
+xpcf_xml_files.path = $$(HOME)/.xpcf/SolAR
 xpcf_xml_files.files=$$files($${PWD}/xpcf*.xml)
 
 INSTALLS += header_files
 INSTALLS += xpcf_xml_files
+
+OTHER_FILES += \
+    packagedependencies.txt
+
+#NOTE : Must be placed at the end of the .pro
+include ($$shell_quote($$shell_path($$(REMAKEN_RULES_ROOT)/qmake/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows
