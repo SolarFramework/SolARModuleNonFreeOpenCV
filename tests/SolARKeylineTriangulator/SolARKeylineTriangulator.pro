@@ -2,7 +2,7 @@ QT       -= core gui
 CONFIG -= app_bundle qt
 
 TARGET = SolARKeylineTriangulator
-VERSION=0.7.0
+VERSION=0.8.0
 DEFINES +=  $${TARGET}VERSION=\"$${VERSION}\"
 
 CONFIG += c++1z
