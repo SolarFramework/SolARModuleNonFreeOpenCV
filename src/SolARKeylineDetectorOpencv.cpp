@@ -43,10 +43,10 @@ SolARKeylineDetectorOpencv::SolARKeylineDetectorOpencv() : ConfigurableBase(xpcf
 	declareInterface<api::features::IKeylineDetector>(this);
 
 	declareProperty("imageRatio", m_imageRatio);
-	declareProperty("nbDescriptors", m_nbDescriptors);
 	declareProperty("scale", m_scale);
 	declareProperty("numOctave", m_numOctave);
 	declareProperty("type", m_type);
+	declareProperty("minLineLength", m_minLineLength);
 	LOG_DEBUG("SolARKeylineDetectorOpencv constructor");
 }
 
@@ -120,6 +120,9 @@ void SolARKeylineDetectorOpencv::detect(const SRef<Image> image, std::vector<Key
 
 	for (int i = 0; i < cvKeylines.size(); i++)
 	{
+		if (cvKeylines[i].lineLength * ratioInv <= m_minLineLength)
+			continue;
+
 		Keyline kli;
 		kli.init(
 			cvKeylines[i].pt.x * ratioInv,

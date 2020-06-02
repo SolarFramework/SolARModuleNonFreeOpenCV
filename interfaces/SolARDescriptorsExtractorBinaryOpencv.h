@@ -75,6 +75,7 @@ private:
 	int m_scale = 2;
 	int m_numOctave = 1;
 	int m_widthOfBand = 7;
+	int m_minLineLength = 0;
 };
 }
 }

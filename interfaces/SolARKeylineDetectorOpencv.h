@@ -59,11 +59,9 @@ private:
 	cv::Ptr<cv::line_descriptor::LSDDetector> m_detector;
 	
 	float m_imageRatio = 1.0f;
-
 	int m_scale = 2;
 	int m_numOctave = 1;
-	
-	int m_nbDescriptors = 10000;
+	int m_minLineLength = 0;
 };
 }
 }

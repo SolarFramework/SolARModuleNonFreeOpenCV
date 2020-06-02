@@ -37,6 +37,7 @@ SolARDescriptorsExtractorBinaryOpencv::SolARDescriptorsExtractorBinaryOpencv() :
 	declareProperty("scale", m_scale);
 	declareProperty("numOctave", m_numOctave);
 	declareProperty("widthOfBand", m_widthOfBand);
+	declareProperty("minLineLength", m_minLineLength);
 }
 
 SolARDescriptorsExtractorBinaryOpencv::~SolARDescriptorsExtractorBinaryOpencv() { }
@@ -69,19 +70,19 @@ void SolARDescriptorsExtractorBinaryOpencv::extract(const SRef<Image> image, con
 	for (int i = 0; i < keylines.size(); i++)
 	{
 		cv::line_descriptor::KeyLine kli;
-		kli.pt = cv::Point2f(keylines[i].getX() * ratioInv, keylines[i].getY() * ratioInv);
-		kli.startPointX = keylines[i].getStartPointX() * ratioInv;
-		kli.startPointY = keylines[i].getStartPointY() * ratioInv;
-		kli.sPointInOctaveX = keylines[i].getSPointInOctaveX() * ratioInv;
-		kli.sPointInOctaveY = keylines[i].getSPointInOctaveY() * ratioInv;
-		kli.endPointX = keylines[i].getEndPointX() * ratioInv;
-		kli.endPointY = keylines[i].getEndPointY() * ratioInv;
-		kli.sPointInOctaveX = keylines[i].getEPointInOctaveX() * ratioInv;
-		kli.sPointInOctaveY = keylines[i].getEPointInOctaveY() * ratioInv;
-		kli.lineLength = keylines[i].getLineLength() * ratioInv;
-		kli.numOfPixels = keylines[i].getNumOfPixels() * ratioInv;
+		kli.pt = cv::Point2f(keylines[i].getX() * m_imageRatio, keylines[i].getY() * m_imageRatio);
+		kli.startPointX = keylines[i].getStartPointX() * m_imageRatio;
+		kli.startPointY = keylines[i].getStartPointY() * m_imageRatio;
+		kli.sPointInOctaveX = keylines[i].getSPointInOctaveX() * m_imageRatio;
+		kli.sPointInOctaveY = keylines[i].getSPointInOctaveY() * m_imageRatio;
+		kli.endPointX = keylines[i].getEndPointX() * m_imageRatio;
+		kli.endPointY = keylines[i].getEndPointY() * m_imageRatio;
+		kli.sPointInOctaveX = keylines[i].getEPointInOctaveX() * m_imageRatio;
+		kli.sPointInOctaveY = keylines[i].getEPointInOctaveY() * m_imageRatio;
+		kli.lineLength = keylines[i].getLineLength() * m_imageRatio;
+		kli.numOfPixels = keylines[i].getNumOfPixels() * m_imageRatio;
 		kli.angle = keylines[i].getAngle();
-		kli.size = keylines[i].getSize() * ratioInv;
+		kli.size = keylines[i].getSize() * m_imageRatio;
 		kli.response = keylines[i].getResponse();
 		kli.octave = keylines[i].getOctave();
 		kli.class_id = keylines[i].getClassId();
@@ -109,34 +110,42 @@ void SolARDescriptorsExtractorBinaryOpencv::compute(const SRef<Image> image, std
 		m_detector->detect(img_1, cvKeylines, m_scale, m_numOctave);
 	else
 		m_extractor->detect(img_1, cvKeylines);
+
+	// Filter out keylines that are less than m_minLineLength pixel length
+	std::vector<cv::line_descriptor::KeyLine> cvKeylinesFiltered;
+	for (unsigned i = 0; i < cvKeylines.size(); i++)
+		if (cvKeylines[i].lineLength >= m_minLineLength)
+			cvKeylinesFiltered.push_back(cvKeylines[i]);
+
 	// Descriptors extraction
-	m_extractor->compute(img_1, cvKeylines, cvDescriptors);
+	m_extractor->compute(img_1, cvKeylinesFiltered, cvDescriptors);
 
 	keylines.clear();
-	for (int i = 0; i < cvKeylines.size(); i++)
+	for (unsigned i = 0; i < cvKeylinesFiltered.size(); i++)
 	{
 		Keyline kli;
 		kli.init(
-			cvKeylines[i].pt.x * ratioInv,
-			cvKeylines[i].pt.y * ratioInv,
-			cvKeylines[i].getStartPoint().x * ratioInv,
-			cvKeylines[i].getStartPoint().y * ratioInv,
-			cvKeylines[i].getStartPointInOctave().x * ratioInv,
-			cvKeylines[i].getStartPointInOctave().y * ratioInv,
-			cvKeylines[i].getEndPoint().x * ratioInv,
-			cvKeylines[i].getEndPoint().y * ratioInv,
-			cvKeylines[i].getEndPointInOctave().x * ratioInv,
-			cvKeylines[i].getEndPointInOctave().y * ratioInv,
-			cvKeylines[i].lineLength * ratioInv,
-			cvKeylines[i].size * ratioInv,
-			cvKeylines[i].angle,
-			cvKeylines[i].response,
-			cvKeylines[i].numOfPixels * ratioInv,
-			cvKeylines[i].octave,
-			cvKeylines[i].class_id
+			cvKeylinesFiltered[i].pt.x * ratioInv,
+			cvKeylinesFiltered[i].pt.y * ratioInv,
+			cvKeylinesFiltered[i].getStartPoint().x * ratioInv,
+			cvKeylinesFiltered[i].getStartPoint().y * ratioInv,
+			cvKeylinesFiltered[i].getStartPointInOctave().x * ratioInv,
+			cvKeylinesFiltered[i].getStartPointInOctave().y * ratioInv,
+			cvKeylinesFiltered[i].getEndPoint().x * ratioInv,
+			cvKeylinesFiltered[i].getEndPoint().y * ratioInv,
+			cvKeylinesFiltered[i].getEndPointInOctave().x * ratioInv,
+			cvKeylinesFiltered[i].getEndPointInOctave().y * ratioInv,
+			cvKeylinesFiltered[i].lineLength * ratioInv,
+			cvKeylinesFiltered[i].size * ratioInv,
+			cvKeylinesFiltered[i].angle,
+			cvKeylinesFiltered[i].response,
+			cvKeylinesFiltered[i].numOfPixels * ratioInv,
+			cvKeylinesFiltered[i].octave,
+			cvKeylinesFiltered[i].class_id
 		);
 		keylines.push_back(kli);
 	}
+
 	// Use ORB as DescriptorType as it is equivalent to the binary descriptor format
     descriptors.reset(new DescriptorBuffer(cvDescriptors.data, DescriptorType::ORB, DescriptorDataType::TYPE_8U, 32, cvDescriptors.rows));
 }

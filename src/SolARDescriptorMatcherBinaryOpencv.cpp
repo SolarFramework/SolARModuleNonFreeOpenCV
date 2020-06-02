@@ -89,10 +89,6 @@ IDescriptorMatcher::RetCode SolARDescriptorMatcherBinaryOpencv::match(const SRef
 	unsigned idx;
 	for (unsigned i = 0; i < cvMatches.size(); i++)
 	{
-		//if (cvMatches[i][0].distance < m_distanceRatio * cvMatches[i][1].distance)
-		//{
-		//	matches.push_back(DescriptorMatch(cvMatches[i][0].queryIdx, cvMatches[i][0].trainIdx, cvMatches[i][0].distance));
-		//}
 		idx = getBestMatchIndex(cvMatches[i]);
 		if (idx >= 0)
 			matches.push_back(DescriptorMatch(cvMatches[i][idx].queryIdx, cvMatches[i][idx].trainIdx, cvMatches[i][idx].distance));
