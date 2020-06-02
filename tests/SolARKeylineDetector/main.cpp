@@ -22,7 +22,7 @@ using namespace SolAR::datastructure;
 using namespace SolAR::api;
 using namespace SolAR::MODULES::OPENCV;
 
-#define WEBCAM
+#define WEBCAM 1
 
 /**
  * Declare module.
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 		cv::Mat opencvImage;
 		std::vector<Keyline> keylines;
 
-#ifdef WEBCAM
+#if WEBCAM
 		// Init camera
 		if (camera->start() != FrameworkReturnCode::_SUCCESS)
 		{
@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
 		}
 		// Detect keylines in image
 		keylineDetector->detect(image, keylines);
+		LOG_INFO("Detected {} lines.", keylines.size());
 		// Draw detected keylines
 		overlay->drawLines(keylines, image);
         // Display the image with matches in a viewer. If escape key is pressed, exit the loop.

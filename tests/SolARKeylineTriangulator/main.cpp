@@ -18,8 +18,10 @@
 #include "api/features/IContoursExtractor.h"
 #include "api/features/IContoursFilter.h"
 #include "api/features/IDescriptorMatcher.h"
+#include "api/features/IDescriptorsExtractor.h"
 #include "api/features/IDescriptorsExtractorBinary.h"
 #include "api/features/IDescriptorsExtractorSBPattern.h"
+#include "api/features/IKeypointDetector.h"
 #include "api/features/IMatchesFilter.h"
 #include "api/features/ISBPatternReIndexer.h"
 #include "api/geom/IImage2WorldMapper.h"
@@ -30,23 +32,13 @@
 #include "api/input/files/IMarker2DSquaredBinary.h"
 #include "api/solver/map/IBundler.h"
 #include "api/solver/map/ITriangulator.h"
+#include "api/solver/pose/I3DTransformFinderFrom2D3DPointLine.h"
 #include "api/solver/pose/I3DTransformFinderFrom2D3D.h"
 
 #include "SolAROpenCVHelper.h"
-#include "SolAROptimizationG2O.h"
 
 #include <opencv2/core.hpp>
 #include "opencv2/video/video.hpp"
-
-#include <g2o/core/block_solver.h>
-#include <g2o/core/optimization_algorithm_levenberg.h>
-#include <g2o/solvers/eigen/linear_solver_eigen.h>
-#include <g2o/core/block_solver.h>
-#include <g2o/types/sba/types_six_dof_expmap.h>
-#include <g2o/types/sim3/types_seven_dof_expmap.h>
-#include <g2o/types/slam3d_addons/types_slam3d_addons.h>
-#include <g2o/core/robust_kernel_impl.h>
-
 
 #define MIN_THRESHOLD -1
 #define MAX_THRESHOLD 220
@@ -214,9 +206,10 @@ double triangulate(	const std::vector<Keyline> & keylines1,
 	for (unsigned i = 0; i < matches.size(); i++)
 	//unsigned i = 0;
 	{
-
-		Keyline kl1 = keylines1[matches[i].getIndexInDescriptorA()];
-		Keyline kl2 = keylines2[matches[i].getIndexInDescriptorB()];
+		int index1 = matches[i].getIndexInDescriptorA();
+		int index2 = matches[i].getIndexInDescriptorB();
+		Keyline kl1 = keylines1[index1];
+		Keyline kl2 = keylines2[index2];
 
 		// Start & End points in homogeneous space
 		cv::Mat start1 = (cv::Mat_<double>(3, 1) << kl1.getStartPointX(), kl1.getStartPointY(), 1);
@@ -301,8 +294,7 @@ void drawTriangulation(	const std::vector<Keyline> & keylines1,
 						const Transform3Df & pose1,
 						const Transform3Df & pose2,
 						const CamCalibration & intrinsicParams,
-						const std::vector<Edge3Df> & lines3D,
-						const std::vector<int> & indices,
+						const std::vector<CloudLine> & lines3D,
 						const SRef<Image> & img1, const SRef<Image> & img2,
 						SRef<Image> & imgDebug)
 {
@@ -323,11 +315,13 @@ void drawTriangulation(	const std::vector<Keyline> & keylines1,
 	cv_img1.copyTo(cv_imgDebug(cv::Rect(0, 0, img1_width, img1->getHeight())));
 	cv_img2.copyTo(cv_imgDebug(cv::Rect(img1_width, 0, img2->getWidth(), img2->getHeight())));
 
-	for (unsigned i = 0; i < indices.size(); i++)
+	for (unsigned i = 0; i < lines3D.size(); i++)
 	{
-		Keyline kl1 = keylines1[matches[indices[i]].getIndexInDescriptorA()];
-		Keyline kl2 = keylines2[matches[indices[i]].getIndexInDescriptorB()];
-		Edge3Df line3D = lines3D[i];
+		std::map<unsigned int, unsigned int> visibility = lines3D[i].getVisibility();
+
+		Keyline kl1 = keylines1[visibility[0]];
+		Keyline kl2 = keylines2[visibility[1]];
+		Edge3Df line3D(lines3D[i].p1, lines3D[i].p2);
 
 		// Draw l1 and l2 on their respective image
 		cv::line(cv_imgDebug, cv::Point2f(kl1.getStartPointX(), kl1.getStartPointY()), cv::Point2f(kl1.getEndPointX(), kl1.getEndPointY()), cv::Scalar(0, 255, 0), 3);
@@ -382,160 +376,6 @@ void drawTriangulation(	const std::vector<Keyline> & keylines1,
 		cv::line(cv_imgDebug, start2D1, end2D1, cv::Scalar(255, 0, 0), 2);
 		cv::line(cv_imgDebug, start2D2, end2D2, cv::Scalar(255, 0, 0), 2);
 	}
-
-
-}
-
-g2o::SE3Quat toSE3Quat(const Transform3Df &pose)
-{
-	Eigen::Matrix<double, 3, 3> R;
-	R << pose(0, 0), pose(0, 1), pose(0, 2),
-		pose(1, 0), pose(1, 1), pose(1, 2),
-		pose(2, 0), pose(2, 1), pose(2, 2);
-
-	Eigen::Matrix<double, 3, 1> t(pose(0, 3), pose(1, 3), pose(2, 3));
-
-	return g2o::SE3Quat(R, t);
-}
-
-Transform3Df toSolarPose(const g2o::SE3Quat &SE3)
-{
-	Eigen::Matrix<double, 4, 4> eigMat = SE3.to_homogeneous_matrix();
-	Transform3Df pose;
-	for (int row = 0; row < 4; row++) {
-		for (int col = 0; col < 4; col++) {
-			pose(row, col) = (float)eigMat(row, col);
-		}
-	}
-
-	return pose;
-}
-
-double solve(const std::vector<std::vector<Keyline>> originalKeylines,
-	const std::vector<Edge3Df> & lineCloud,
-	const std::vector<DescriptorMatch> & matches,
-	const std::vector<int> & indices,
-	const std::vector<Transform3Df> originalPoses,
-	const CamCalibration & camMatrix,
-	const CamDistortion & distortion,
-	std::vector<Edge3Df> & correctedLineCloud,
-	std::vector<Transform3Df> & correctedPoses,
-	CamCalibration & correctedcamMatrix,
-	CamDistortion & correctedDistortion)
-{
-	correctedPoses = originalPoses;
-	correctedLineCloud = lineCloud;
-	double reproj_error = 0.0;
-
-	// Setup optimizer
-	g2o::SparseOptimizer optimizer;
-	auto linearSolver = std::make_unique<g2o::LinearSolverEigen<g2o::BlockSolver_6_3::PoseMatrixType>>();
-
-	auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<g2o::BlockSolver_6_3>(std::move(linearSolver)));
-	optimizer.setAlgorithm(solver);
-
-	// Register pose vertices
-	for (unsigned i = 0; i < originalPoses.size(); i++)
-	{
-		g2o::VertexSE3Expmap * vSE3 = new g2o::VertexSE3Expmap();
-		vSE3->setEstimate(toSE3Quat(originalPoses[i].inverse()));
-		vSE3->setId(i);
-		vSE3->setFixed(i == 0);
-		optimizer.addVertex(vSE3);
-		LOG_INFO("insert pose: \n{}", vSE3->estimate());
-	}
-
-	const float thHuber2D = sqrt(5.99);
-	double invSigma = 0.5;
-	// Register LineCloud vertices
-	for (unsigned i = 0; i < lineCloud.size(); i++)
-	{
-		Edge3Df line = lineCloud[i];
-		for (unsigned endpoint = 0; endpoint < 2; endpoint++)
-		{
-			unsigned id = originalPoses.size() + 2 * i + endpoint;
-			g2o::VertexSBAPointXYZ* vPoint = new g2o::VertexSBAPointXYZ();
-			if (!endpoint)
-				vPoint->setEstimate(Eigen::Matrix<double, 3, 1>(line.p1.getX(), line.p1.getY(), line.p1.getZ()));
-			else
-				vPoint->setEstimate(Eigen::Matrix<double, 3, 1>(line.p2.getX(), line.p2.getY(), line.p2.getZ()));
-			vPoint->setId(id);
-			vPoint->setMarginalized(true);
-			optimizer.addVertex(vPoint);
-
-			// Set Edges
-			for (unsigned poseIdx = 0; poseIdx < originalPoses.size(); poseIdx++)
-			{
-				Keyline kl;
-				if (poseIdx == 0)
-					kl = originalKeylines[poseIdx][matches[indices[i]].getIndexInDescriptorA()];
-				else
-					kl = originalKeylines[poseIdx][matches[indices[i]].getIndexInDescriptorB()];
-
-				// Define line function
-				Eigen::Vector3d lineF;
-				lineF <<
-					kl.getStartPointY() - kl.getEndPointY(),
-					kl.getEndPointX() - kl.getStartPointX(),
-					kl.getStartPointX() * kl.getEndPointY() - kl.getEndPointX() * kl.getStartPointY();
-
-				EdgeLineProjectXYZ* e = new EdgeLineProjectXYZ();
-				e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(id)));
-				e->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(poseIdx)));
-				e->setMeasurement(lineF);
-				e->setInformation(Eigen::Matrix3d::Identity() * invSigma);
-
-				g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
-				rk->setDelta(thHuber2D);
-				e->setRobustKernel(rk);
-
-				e->fx = camMatrix(0, 0);
-				e->fy = camMatrix(1, 1);
-				e->cx = camMatrix(0, 2);
-				e->cy = camMatrix(1, 2);
-				optimizer.addEdge(e);
-			}
-		}
-	}
-	LOG_INFO("init done");
-	// Optimize!
-	optimizer.initializeOptimization();
-	optimizer.setVerbose(0);
-	optimizer.optimize(10);
-	// Recover optimized data
-	// Poses
-	for (unsigned i = 0; i < correctedPoses.size(); i++)
-	{
-		g2o::VertexSE3Expmap* vSE3 = static_cast<g2o::VertexSE3Expmap*>(optimizer.vertex(i));
-		g2o::SE3Quat SE3quat = vSE3->estimate();
-		correctedPoses[i] = toSolarPose(SE3quat).inverse();
-		LOG_INFO("correctedPoses[{}]: \n{}", i, SE3quat);
-	}
-	// Lines
-	for (unsigned i = 0; i < correctedLineCloud.size(); i++)
-	{
-		for (unsigned endpoint = 0; endpoint < 2; endpoint++)
-		{
-			unsigned id = originalPoses.size() + (2 * i) + endpoint;
-
-			g2o::VertexSBAPointXYZ* vPoint = static_cast<g2o::VertexSBAPointXYZ*>(optimizer.vertex(id));
-			Eigen::Matrix<double, 3, 1> xyz = vPoint->estimate();
-			if (!endpoint)
-			{
-				correctedLineCloud[i].p1.setX((float)xyz(0));
-				correctedLineCloud[i].p1.setY((float)xyz(1));
-				correctedLineCloud[i].p1.setZ((float)xyz(2));
-			}
-			else
-			{
-				correctedLineCloud[i].p2.setX((float)xyz(0));
-				correctedLineCloud[i].p2.setY((float)xyz(1));
-				correctedLineCloud[i].p2.setZ((float)xyz(2));
-			}
-		}
-	}
-	reproj_error = (double) optimizer.chi2();
-	return reproj_error;
 }
 
 int main(int argc, char *argv[])
@@ -547,14 +387,11 @@ int main(int argc, char *argv[])
 
 	try
 	{
-		// Argument parsing
-		int nbBundleKeyframe = 3;
-		if (argc == 2)
-			nbBundleKeyframe = std::stoi(std::string(argv[1]));
-		LOG_INFO("Using {} keyframes for bundle adjustment", nbBundleKeyframe);
+		/*
+		 * Initialization
+		 */
 
-		/* instantiate component manager*/
-		/* this is needed in dynamic mode */
+		/* Instantiate component manager */
 		SRef<xpcf::IComponentManager> xpcfComponentManager = xpcf::getComponentManagerInstance();
 
 		if(xpcfComponentManager->load("SolARKeylineTriangulator_config.xml") != org::bcom::xpcf::_SUCCESS)
@@ -562,16 +399,18 @@ int main(int argc, char *argv[])
 			LOG_ERROR("Failed to load the configuration file SolARKeylineTriangulator_config.xml");
 			return -1;
 		}
-
 		// declare and create components
         LOG_INFO("Start creating components");
-
 		auto camera = xpcfComponentManager->resolve<input::devices::ICamera>();
+		auto keypointDetector = xpcfComponentManager->resolve<features::IKeypointDetector>();
+		auto pointDescriptorExtractor = xpcfComponentManager->resolve<features::IDescriptorsExtractor>();
 		auto descriptorsExtractor = xpcfComponentManager->resolve<features::IDescriptorsExtractorBinary>();
+		auto pointMatcher = xpcfComponentManager->create<SolARDescriptorMatcherKNNOpencv>()->bindTo<features::IDescriptorMatcher>();
 		auto descriptorMatcher = xpcfComponentManager->create<SolARDescriptorMatcherBinaryOpencv>()->bindTo<features::IDescriptorMatcher>();
 		auto matchesFilter = xpcfComponentManager->resolve<features::IMatchesFilter>();
 		auto triangulator = xpcfComponentManager->resolve<solver::map::ITriangulator>();
 		auto bundler = xpcfComponentManager->resolve<solver::map::IBundler>();
+		auto pnpl = xpcfComponentManager->resolve<solver::pose::I3DTransformFinderFrom2D3DPointLine>();
 		auto overlay2D = xpcfComponentManager->resolve<display::I2DOverlay>();
 		auto overlay3D = xpcfComponentManager->create<SolAR3DOverlayBoxOpencv>()->bindTo<display::I3DOverlay>();
 		auto viewer = xpcfComponentManager->create<SolARImageViewerOpencv>("release")->bindTo<display::IImageViewer>();
@@ -589,17 +428,15 @@ int main(int argc, char *argv[])
 		auto patternReIndexer = xpcfComponentManager->resolve<features::ISBPatternReIndexer>();
 		auto img2worldMapper = xpcfComponentManager->resolve<geom::IImage2WorldMapper>();
 		auto pnp = xpcfComponentManager->resolve<solver::pose::I3DTransformFinderFrom2D3D>();
-
         LOG_DEBUG("Components created!");
-
 		// Init with camera intrinsics
 		const CamCalibration camIntrinsics = camera->getIntrinsicsParameters();
 		const CamDistortion camDistortion = camera->getDistorsionParameters();
 		pnp->setCameraParameters(camIntrinsics, camDistortion);
 		triangulator->setCameraParameters(camIntrinsics, camDistortion);
 		bundler->setCameraParameters(camIntrinsics, camDistortion);
+		pnpl->setCameraParameters(camIntrinsics, camDistortion);
 		overlay3D->setCameraParameters(camIntrinsics, camDistortion);
-
 		// Components initialisation for marker detection
 		SRef<DescriptorBuffer> markerPatternDescriptor;
 		binaryMarker->loadMarker();
@@ -612,18 +449,43 @@ int main(int argc, char *argv[])
 		img2worldMapper->bindTo<xpcf::IConfigurable>()->getProperty("digitalHeight")->setIntegerValue(patternSize);
 		img2worldMapper->bindTo<xpcf::IConfigurable>()->getProperty("worldWidth")->setFloatingValue(binaryMarker->getSize().width);
 		img2worldMapper->bindTo<xpcf::IConfigurable>()->getProperty("worldHeight")->setFloatingValue(binaryMarker->getSize().height);
-
+		/* Argument parsing */
+		int nbBundleKeyframe = 2;
+		if (argc == 2)
+			nbBundleKeyframe = std::stoi(std::string(argv[1]));
+		LOG_INFO("Using {} keyframes for bundle adjustment", nbBundleKeyframe);
+		/* Main loop variables declaration */
 		bool stop = false;
 		int count = 0;
 		clock_t start, end;
 		xpcf::DropBuffer<SRef<Image>> m_markerPoseBuffer;
 		xpcf::DropBuffer<std::pair<SRef<Image>, Transform3Df>> m_detectionBuffer;
-		xpcf::DropBuffer<std::tuple<SRef<Image>, Transform3Df, std::vector<Keyline>, SRef<DescriptorBuffer>>> m_triangulationBuffer;
+		xpcf::DropBuffer<SRef<Frame>> m_triangulationBuffer;
 		xpcf::DropBuffer<SRef<Image>> m_displayBuffer;
 		xpcf::DropBuffer<SRef<Image>> m_displayDebugBuffer;
-		xpcf::DropBuffer<std::tuple<std::vector<Edge3Df>, Transform3Df, std::vector<Transform3Df>, std::vector<Edge3Df>>> m_display3DBuffer;
+		xpcf::DropBuffer<std::tuple<std::vector<CloudLine>, Transform3Df, std::vector<Transform3Df>, std::vector<CloudLine>>> m_display3DBuffer;
+		// Consecutive frame vector buffer
+		std::vector<SRef<Frame>> frames;
+		// Keeps track of the matches between two consecutives frames: index i contains matches between frames i and i+1. 
+		std::vector<std::vector<DescriptorMatch>> frameMatchesPoint;
+		std::vector<std::vector<DescriptorMatch>> frameMatches;
+		std::vector<std::vector<CloudPoint>> frameTriangulatedPoints;
+		std::vector<std::vector<CloudLine>> frameTriangulatedLines;
+		std::vector<std::vector<Keyline>> originalKeylines;
+		std::vector<Transform3Df> originalPoses;
+		SRef<Image> imgDebug;
+		// 3D Viewer
+		Transform3Df poseView;
+		std::vector<Transform3Df> refinedPosesView;
+		std::vector<CloudLine> lines3Dview;
+		std::vector<CloudLine> refinedLines3Dview;
+		bool viewerInit = false;
 
-		// Pose estimation using fiducial marker
+		/*
+		 * Tasks and functions
+		 */
+
+		/* Pose estimation using fiducial marker */
 		auto detectFiducialMarker = [&imageConvertor, &imageFilterBinary, &contoursExtractor, &contoursFilter, &perspectiveController,
 			&patternDescriptorExtractor, &patternMatcher, &markerPatternDescriptor, &patternReIndexer, &img2worldMapper, &pnp, &overlay3D](SRef<Image>& image, Transform3Df &pose) {
 			SRef<Image>                     greyImage, binaryImage;
@@ -676,7 +538,7 @@ int main(int argc, char *argv[])
 			return marker_found;
 		};
 
-		// Camera image capture task
+		/* Camera image capture task */
 		auto fnCapture = [&]()
 		{
 			SRef<Image> image;
@@ -688,7 +550,7 @@ int main(int argc, char *argv[])
 			m_markerPoseBuffer.push(image);
 		};
 
-		// Marker Pose Estimation task
+		/* Marker Pose Estimation task */
 		auto fnMarkerPose = [&]()
 		{
 			SRef<Image> image, imageView;
@@ -707,7 +569,7 @@ int main(int argc, char *argv[])
 			m_displayBuffer.push(imageView);
 		};
 
-		// Features extraction task
+		/* Features extraction task */
 		auto fnDetection = [&]()
 		{
 			std::pair<SRef<Image>, Transform3Df> bufferOutput;
@@ -718,101 +580,154 @@ int main(int argc, char *argv[])
 			}
 			SRef<Image> image = bufferOutput.first;
 			Transform3Df markerPose = bufferOutput.second;
+			std::vector<Keypoint> keypoints;
 			std::vector<Keyline> keylines;
+			SRef<DescriptorBuffer> pointDescriptors;
 			SRef<DescriptorBuffer> descriptors;
+			keypointDetector->detect(image, keypoints);
+			pointDescriptorExtractor->extract(image, keypoints, pointDescriptors);
 			descriptorsExtractor->compute(image, keylines, descriptors);
-			m_triangulationBuffer.push(std::make_tuple(image, markerPose, keylines, descriptors));
+			SRef<Frame> frame = xpcf::utils::make_shared<Frame>(keypoints, pointDescriptors, keylines, descriptors, image, markerPose);
+			m_triangulationBuffer.push(frame);
+		};
+
+		/* Matcher */
+		auto match = [&](SRef<Frame> & frame1, SRef<Frame> & frame2, std::vector<DescriptorMatch> & matches, std::vector<DescriptorMatch> & pointMatches, bool filter = true)
+		{
+			// Matching
+			descriptorMatcher->match(frame1->getDescriptorsLine(), frame2->getDescriptorsLine(), matches);
+			pointMatcher->match(frame1->getDescriptors(), frame2->getDescriptors(), pointMatches);
+			LOG_INFO("matches size: {}", matches.size());
+			if (filter)
+			{
+				// Filter out obvious outliers (using fundamental matrix)
+				matchesFilter->filter(matches, matches, frame1->getKeylines(), frame2->getKeylines());
+				matchesFilter->filter(pointMatches, pointMatches, frame1->getKeypoints(), frame2->getKeypoints());
+				LOG_INFO("Filtered matches size: {}", matches.size());
+			}
+		};
+
+		/* Pose difference check */
+		auto checkPoseDiff = [&](SRef<Frame> & frame1, SRef<Frame> & frame2, float minDistance = 0.5f)
+		{
+			Transform3Df pose1 = frame1->getPose();
+			Transform3Df pose2 = frame2->getPose();
+			float disPoses = std::sqrtf(std::powf(pose1(0, 3) - pose2(0, 3), 2.f) + 
+										std::powf(pose1(1, 3) - pose2(1, 3), 2.f) +
+										std::powf(pose1(2, 3) - pose2(2, 3), 2.f));
+			return disPoses > minDistance;
 		};
 		 
-		// Triangulation task
-		std::vector<SRef<Image>> images;
-		std::vector<Transform3Df> poses;
-		std::vector<Transform3Df> refinedPoses;
-		std::vector<std::vector<Keyline>> detectedKeylines;
-		std::vector<SRef<DescriptorBuffer>> extractedDescriptors;
-		SRef<Image> previousImage;
-		Transform3Df previousPose;
-		std::vector<Keyline> previousKeylines;
-		SRef<DescriptorBuffer> previousDescriptors;
-		SRef<Image> imgDebug;
-		bool initDone = false;
+		/* Triangulation task */
 		auto fnTriangulation = [&]()
 		{
-			std::tuple<SRef<Image>, Transform3Df, std::vector<Keyline>, SRef<DescriptorBuffer>> bufferOutput;
-			if (!m_triangulationBuffer.tryPop(bufferOutput))
+			SRef<Frame> newFrame;
+			if (!m_triangulationBuffer.tryPop(newFrame))
 			{
 				xpcf::DelegateTask::yield();
 				return;
 			}
-			SRef<Image> image = std::get<0>(bufferOutput);
-			Transform3Df pose = std::get<1>(bufferOutput);
-			std::vector<Keyline> keylines = std::get<2>(bufferOutput);
-			SRef<DescriptorBuffer> descriptors = std::get<3>(bufferOutput);
-			std::vector<DescriptorMatch> matches;
-			std::vector<DescriptorMatch> outMatches;
-			std::vector<Edge3Df> lines3D;
-			std::vector<int> indices;
-			std::vector<Edge3Df> outLines3D;
-			std::vector<Transform3Df> outPoses;
-			CamCalibration outCamMatrix;
-			CamDistortion outDistortion;
-			double error, optimizer_error;
-			std::vector<std::vector<Keyline>> originalKeylines;
-			std::vector<Transform3Df> originalPoses;
-			// Init values on first frame
-			if (!initDone)
+			// Init frame buffer
+			if (frames.empty())
+				frames.push_back(newFrame);
+			// Take a new frame if is it far enough from the last one
+			else if (checkPoseDiff(frames[frames.size() - 1], newFrame))
 			{
-				initDone = true;
-				previousImage = image;
-				previousPose = pose;
-				previousKeylines = keylines;
-				previousDescriptors = descriptors;
-			}
-			else
-			{
-				float disPoses = std::sqrtf(std::powf(pose(0, 3) - previousPose(0, 3), 2.f) + std::powf(pose(1, 3) - previousPose(1, 3), 2.f) +
-					std::powf(pose(2, 3) - previousPose(2, 3), 2.f));
-
-				if (disPoses > 0.5f)
+				// Push new frames into the buffer
+				frames.push_back(newFrame);
+				// Process last two frames
+				int nbFrames = frames.size();
+				int id = nbFrames - 2;
+				// Get last two frames from the buffer
+				SRef<Frame> frame1, frame2;
+				frame1 = frames[id];
+				frame2 = frames[id + 1];
+				// Match last two frames
+				std::vector<DescriptorMatch> pointMatches;
+				std::vector<DescriptorMatch> matches;
+				match(frame1, frame2, matches, pointMatches);
+				frameMatches.push_back(matches);
+				frameMatchesPoint.push_back(pointMatches);
+				// Line Triangulation between them
+				std::vector<CloudLine> lineCloud;
+				triangulator->triangulate(frame1->getKeylines(), frame2->getKeylines(), frame1->getDescriptorsLine(), frame2->getDescriptorsLine(), frameMatches[id],
+					std::make_pair(id, id+1), frame1->getPose(), frame2->getPose(), lineCloud);
+				frameTriangulatedLines.push_back(lineCloud);
+				// Point Triangulation
+				std::vector<CloudPoint>	cloud;
+				triangulator->triangulate(frame1->getKeypoints(), frame2->getKeypoints(), frame1->getDescriptors(), frame2->getDescriptors(),
+					pointMatches, std::make_pair(id, id+1), frame1->getPose(), frame2->getPose(), cloud);
+				frameTriangulatedPoints.push_back(cloud);
+				// Bundle Adjustment using all buffered frames
+				std::vector<CloudLine> outLines3D;
+				std::vector<Transform3Df> outPoses;
+				bundler->solve(frames, frameTriangulatedLines, outLines3D, outPoses);
+				LOG_INFO("\ndone opti: id = {}, outLines3D: {}", id, outLines3D.size());
+				// Attempt PnPL on frame[0]
+				Transform3Df framePose;
+				std::vector<Point2Df> points2D;
+				std::vector<Point3Df> points3D;
+				for (CloudPoint point : frameTriangulatedPoints[0])
+					for (auto it : point.getVisibility())
+						if (it.first == 0)
+						{
+							Keypoint pt = frames[0]->getKeypoints()[it.second];
+							points2D.push_back(Point2Df(pt.getX(), pt.getY()));
+							points3D.push_back(Point3Df(point.getX(), point.getY(), point.getZ()));
+						}
+				LOG_INFO("points: {}, {}", points2D.size(), points3D.size());
+				std::vector<Edge2Df> lines2D;
+				std::vector<Edge3Df> lines3D;
+				std::vector<CloudLine> clines3D;
+				for (CloudLine line : frameTriangulatedLines[0])
+					for (auto it : line.getVisibility())
+						if (it.first == 0)
+						{
+							Keyline ln = frames[0]->getKeylines()[it.second];
+							lines2D.push_back(Edge2Df(ln.getStartPointX(), ln.getStartPointY(), ln.getEndPointX(), ln.getEndPointY()));
+							lines3D.push_back(Edge3Df(line.p1, line.p2));
+							clines3D.push_back(line);
+						}
+				LOG_INFO("lines: {}, {}", lines2D.size(), lines3D.size());
+				if (pnp->estimate(points2D, points3D, framePose) == FrameworkReturnCode::_SUCCESS)
 				{
-					// Matching
-					descriptorMatcher->match(previousDescriptors, descriptors, matches);
-					LOG_INFO("matches size: {}", matches.size());
-					// Filter out obvious outliers
-					matchesFilter->filter(matches, outMatches, previousKeylines, keylines);
-					LOG_INFO("outMatches size: {}", outMatches.size());
-					// Triangulate
-					//triangulate(keylines, previousKeylines, outMatches, pose, previousPose, camIntrinsics, lines3D, indices, image, previousImage, imgDebug);
-					error = triangulator->triangulate(previousKeylines, keylines, outMatches, previousPose, pose, lines3D, indices);
-					LOG_INFO("lines3D size: {}", lines3D.size());
-					// Bundle adjustment
-					originalKeylines = std::vector<std::vector<Keyline>>{ previousKeylines, keylines };
-					originalPoses = std::vector<Transform3Df>{ previousPose, pose };
-					//optimizer_error = solve(originalKeylines, lines3D, outMatches, indices, originalPoses,
-					//	camIntrinsics, camDistortion, outLines3D, outPoses, outCamMatrix, outDistortion);
-					optimizer_error = bundler->solve(originalKeylines, lines3D, outMatches, indices, originalPoses, outLines3D, outPoses);
-					LOG_INFO("bundle done, error: {}", optimizer_error);
+					LOG_INFO("\nframePose pnp: \n{}", framePose.matrix());
+				}
+				if (pnpl->estimate(points2D, points3D, lines2D, lines3D, framePose) == FrameworkReturnCode::_SUCCESS)
+				{
+					LOG_INFO("\nframePose pnpl: \n{}", framePose.matrix());
+					m_display3DBuffer.push(std::make_tuple(frameTriangulatedLines[0], framePose, outPoses, outLines3D));
+				}
+				// DEBUG DISPLAY
+				SRef<Image> img1 = frames[0]->getView()->copy();
+				SRef<Image> img2 = frames[1]->getView()->copy();
+				overlay3D->draw(outPoses[0], img1);
+				overlay3D->draw(outPoses[1], img2);
+				drawTriangulation(frames[0]->getKeylines(), frames[1]->getKeylines(), frameMatches[0], outPoses[0], outPoses[1], camIntrinsics, clines3D, img1, img2, imgDebug);
+				m_displayDebugBuffer.push(imgDebug);
 
-					// DEBUG DISPLAY
-					SRef<Image> img1 = previousImage->copy();
-					SRef<Image> img2 = image->copy();
-					overlay3D->draw(outPoses[0], img1);
-					overlay3D->draw(outPoses[1], img2);
-					drawTriangulation(previousKeylines, keylines, outMatches, outPoses[0], outPoses[1], camIntrinsics, outLines3D, indices, img1, img2, imgDebug);
-					m_displayDebugBuffer.push(imgDebug);
-					m_display3DBuffer.push(std::make_tuple(lines3D, pose, outPoses, outLines3D));
-
-					// Push current data to previous data
-					previousImage = image;
-					previousPose = pose;
-					previousKeylines = keylines;
-					previousDescriptors = descriptors;
-
+				if (nbFrames == nbBundleKeyframe)
+				{
+					// Remove most ancient keyframe and shift vectors
+					for (unsigned i = 0; i < nbBundleKeyframe - 1; i++)
+					{
+						frames[i] = frames[i + 1];
+						if (i < id)
+						{
+							frameMatches[i] = frameMatches[i + 1];
+							frameTriangulatedLines[i] = frameTriangulatedLines[i + 1];
+							frameTriangulatedPoints[i] = frameTriangulatedPoints[i + 1];
+						}
+					}
+					frames.pop_back();
+					frameMatches.pop_back();
+					frameTriangulatedLines.pop_back();
+					frameTriangulatedPoints.pop_back();
 				}
 			}
 		};
 
-		// Display task
+		/* Display task */
 		auto fnDisplay = [&]()
 		{
 			SRef<Image> image;
@@ -826,7 +741,7 @@ int main(int argc, char *argv[])
 				stop = true;
 		};
 
-		// Display Debug task
+		/* Display Debug task */
 		auto fnDisplayDebug = [&]()
 		{
 			SRef<Image> image;
@@ -839,32 +754,31 @@ int main(int argc, char *argv[])
 				stop = true;
 		};
 
-		// Display 3D lines task
-		Transform3Df poseView;
-		std::vector<Transform3Df> refinedPosesView;
-		std::vector<Edge3Df> lines3Dview;
-		std::vector<Edge3Df> refinedLines3Dview;
-		bool viewerInit = false;
+		/* Display 3D lines task */
 		auto fnDisplay3D = [&]()
 		{
-			std::tuple<std::vector<Edge3Df>, Transform3Df, std::vector<Transform3Df>, std::vector<Edge3Df>> bufferOutput;
+			std::tuple<std::vector<CloudLine>, Transform3Df, std::vector<Transform3Df>, std::vector<CloudLine>> bufferOutput;
 			if (!m_display3DBuffer.tryPop(bufferOutput))
 			{
 				if (viewerInit)
-					if (viewer3D->display(lines3Dview, poseView, refinedPosesView, refinedLines3Dview) == FrameworkReturnCode::_STOP)
+					if (viewer3D->display(refinedLines3Dview, poseView, refinedPosesView, lines3Dview) == FrameworkReturnCode::_STOP)
 						stop = true;
 				xpcf::DelegateTask::yield();
 				return;
 			}
-			if (!viewerInit) viewerInit = true;
-			
+			if (!viewerInit) 
+				viewerInit = true;
 			lines3Dview = std::get<0>(bufferOutput);
 			poseView = std::get<1>(bufferOutput);
 			refinedPosesView = std::get<2>(bufferOutput);
 			refinedLines3Dview = std::get<3>(bufferOutput);
-			if (viewer3D->display(lines3Dview, poseView, refinedPosesView, refinedLines3Dview) == FrameworkReturnCode::_STOP)
+			if (viewer3D->display(refinedLines3Dview, poseView, refinedPosesView, lines3Dview) == FrameworkReturnCode::_STOP)
 				stop = true;
 		};
+
+		/*
+		 * Main loop
+		 */
 
 		// Init camera
 		if (camera->start() != FrameworkReturnCode::_SUCCESS)
@@ -901,6 +815,7 @@ int main(int argc, char *argv[])
 		printf("\n\nElasped time is %.2lf seconds.\n", duration);
 		printf("Number of processed frames per second : %8.2f\n\n", count / duration);
 	}
+	/* Error handling */
 	catch (xpcf::Exception &e)
 	{
 		LOG_ERROR("{}", e.what());
