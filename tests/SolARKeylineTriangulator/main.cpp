@@ -692,12 +692,12 @@ int main(int argc, char *argv[])
 				if (pnp->estimate(points2D, points3D, framePose) == FrameworkReturnCode::_SUCCESS)
 				{
 					LOG_INFO("\nframePose pnp: \n{}", framePose.matrix());
-				}
-				if (pnpl->estimate(points2D, points3D, lines2D, lines3D, framePose) == FrameworkReturnCode::_SUCCESS)
-				{
-					LOG_INFO("\nframePose pnpl: \n{}", framePose.matrix());
 					m_display3DBuffer.push(std::make_tuple(frameTriangulatedLines[0], framePose, outPoses, outLines3D));
 				}
+				//if (pnpl->estimate(points2D, points3D, lines2D, lines3D, framePose) == FrameworkReturnCode::_SUCCESS)
+				//{
+				//	LOG_INFO("\nframePose pnpl: \n{}", framePose.matrix());
+				//}
 				// DEBUG DISPLAY
 				SRef<Image> img1 = frames[0]->getView()->copy();
 				SRef<Image> img2 = frames[1]->getView()->copy();

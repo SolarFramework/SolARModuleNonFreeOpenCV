@@ -76,7 +76,7 @@
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="77281cda-47c2-4bb7-bde6-5b0d02e75dae" name="I3DTransformFinderFrom2D3D" description="I3DTransformFinderFrom2D3D"/>
         </component>
-        <component uuid="19c2d03c-73d6-4f7c-a7cf-8c42bfa9b575" name="SolARPoseEstimationOPnPL" description="SolARPoseEstimationOPnPL">
+        <component uuid="19c2d03c-73d6-4f7c-a7cf-8c42bfa9b575" name="SolARPoseEstimationPnPL" description="SolARPoseEstimationPnPL">
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="c6e82ced-2e26-4e64-b70d-a77f9961e9af" name="I3DTransformFinderFrom2D3DPointLine" description="I3DTransformFinderFrom2D3DPointLine"/>
         </component>
