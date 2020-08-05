@@ -1,8 +1,1 @@
-opencv|4.1.1|opencv|thirdParties|https://github.com/SolarFramework/binaries/releases/downloadargo-generic
-SolARFramework|0.8.1|SolARFramework|bcomBuild|https://github.com/SolarFramework/SolarFramework/releases/download
-SolARModuleOpenCV|0.8.1|SolARModuleOpenCV|bcomBuild|https://github.com/SolarFramework/SolARModuleOpenCV/releases/download
-SolARModuleNonFreeOpenCV|0.8.1|SolARModuleNonFreeOpenCV|bcomBuild|https://github.com/SolarFramework/SolARModuleNonFreeOpenCV/releases/download
-xpcf|2.3.4|xpcf|thirdParties|https://github.com/SolarFramework/binaries/releases/download
-boost|1.71.0|boost|thirdParties|https://github.com/SolarFramework/binaries/releases/download
-spdlog|0.14.0|spdlog|thirdParties|https://github.com/SolarFramework/binaries/releases/download
-eigen|3.3.5|eigen|thirdParties|https://github.com/SolarFramework/binaries/releases/download
+SolARFramework|0.8.1|SolARFramework|SolARBuild@github|https://github.com/SolarFramework/SolarFramework/releases/download

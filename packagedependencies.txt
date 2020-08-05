@@ -1,2 +1,1 @@
-opencv|4.3.0|opencv|conan|conan-community|default|contrib=True#nonfree=True#harfbuzz=False#gflags=False#glog=False
-SolARModuleOpenCV|0.8.1|SolARModuleOpenCV|SolARBuild@github|https://github.com/SolarFramework/SolARModuleOpenCV/releases/download
+SolARFramework|0.8.1|SolARFramework|SolARBuild@github|https://github.com/SolarFramework/SolarFramework/releases/download

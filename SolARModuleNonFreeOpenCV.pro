@@ -43,12 +43,14 @@ HEADERS += interfaces/SolAROpencvNonFreeAPI.h \
 interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
 interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
 interfaces/SolARKeypointDetectorNonFreeOpencv.h \
-    interfaces/SolARModuleNonFreeOpencv_traits.h
+    interfaces/SolARModuleNonFreeOpencv_traits.h \
+    interfaces/SolARNonFreeOpenCVHelper.h
 
 SOURCES += src/SolARModuleNonFreeOpencv.cpp \
     src/SolARDescriptorsExtractorSURF64Opencv.cpp \
     src/SolARDescriptorsExtractorSURF128Opencv.cpp \
-    src/SolARKeypointDetectorNonFreeOpencv.cpp
+    src/SolARKeypointDetectorNonFreeOpencv.cpp \
+    src/SolARNonFreeOpenCVHelper.cpp
  
 unix:!android {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
@@ -85,7 +87,10 @@ xpcf_xml_files.files=$$files($${PWD}/xpcf*.xml)
 INSTALLS += header_files
 INSTALLS += xpcf_xml_files
 
-DISTFILES += packagedependencies.txt
+DISTFILES += packagedependencies.txt \
+             packagedependencies-linux.txt \
+             packagedependencies-win.txt \
+             packagedependencies-mac.txt
 
 #NOTE : Must be placed at the end of the .pro
 include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows
