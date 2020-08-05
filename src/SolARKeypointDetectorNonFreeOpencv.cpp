@@ -15,13 +15,11 @@
  */
 
 #include "SolARKeypointDetectorNonFreeOpencv.h"
-#include "SolAROpenCVHelper.h"
+#include "SolARNonFreeOpenCVHelper.h"
 #include "core/Log.h"
 
 #include "xpcf/api/IComponentManager.h"
 
-
-#include "SolAROpencvAPI.h"
 #include <string>
 
 #include <iostream>
@@ -39,7 +37,6 @@ namespace xpcf = org::bcom::xpcf;
 
 using namespace cv;
 using namespace cv::xfeatures2d;
-using namespace SolAR::MODULES::OPENCV;
 
 namespace SolAR {
 using namespace datastructure;
@@ -114,7 +111,7 @@ void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> image, std::ve
     keypoints.clear();
 
     // instantiation of an opencv image from an input IImage
-    cv::Mat opencvImage = SolAROpenCVHelper::mapToOpenCV(image);
+    cv::Mat opencvImage = SolARNonFreeOpenCVHelper::mapToOpenCV(image);
 
     cv::Mat img_1;
     cvtColor( opencvImage, img_1, cv::COLOR_BGR2GRAY );
