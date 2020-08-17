@@ -4,7 +4,7 @@ CONFIG -= qt
 
 ## global defintions : target lib name, version
 TARGET = SolARNonFreeOpenCVDescriptorExtractor
-VERSION=0.8.1
+VERSION=0.8.00.8.0
 
 DEFINES += MYVERSION=$${VERSION}
 CONFIG += c++1z
