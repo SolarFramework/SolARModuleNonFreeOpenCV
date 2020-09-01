@@ -18,7 +18,7 @@
 #define SOLARDESCRIPTORSEXTRACTORSURF64OPENCV_H
 
 #include "api/features/IDescriptorsExtractor.h"
-// Definition of SolARDescriptorExtractorOpencv Class //
+// Definition of SolARDescriptorsExtractorSURF64Opencv Class //
 // part of SolAR namespace //
 
 #include "xpcf/component/ConfigurableBase.h"

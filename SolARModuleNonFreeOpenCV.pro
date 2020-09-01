@@ -76,6 +76,7 @@ win32 {
 
 android {
     QMAKE_LFLAGS += -nostdlib++
+    ANDROID_ABIS="arm64-v8a"
 }
 
 header_files.path = $${PROJECTDEPLOYDIR}/interfaces
@@ -87,11 +88,12 @@ xpcf_xml_files.files=$$files($${PWD}/xpcf*.xml)
 INSTALLS += header_files
 INSTALLS += xpcf_xml_files
 
-DISTFILES += packagedependencies.txt \
-             packagedependencies-linux.txt \
-             packagedependencies-win.txt \
-             packagedependencies-mac.txt \
-             packagedependencies-android.txt
+OTHER_FILES += \
+    packagedependencies.txt \
+    packagedependencies-linux.txt \
+    packagedependencies-win.txt \
+    packagedependencies-mac.txt \
+    packagedependencies-android.txt
 
 #NOTE : Must be placed at the end of the .pro
 include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows
