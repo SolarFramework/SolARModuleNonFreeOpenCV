@@ -5,14 +5,14 @@ CONFIG -= qt
 ## global definitions : target lib name, version
 INSTALLSUBDIR = SolARBuild
 TARGET = SolARModuleNonFreeOpenCV
-
 FRAMEWORK = $$TARGET
-VERSION=0.7.0
+VERSION=0.8.0
 
 DEFINES += MYVERSION=$${VERSION}
 DEFINES += TEMPLATE_LIBRARY
 CONFIG += c++1z
 
+include(findremakenrules.pri)
 
 CONFIG(debug,debug|release) {
     DEFINES += _DEBUG=1
@@ -24,13 +24,13 @@ CONFIG(release,debug|release) {
     DEFINES += NDEBUG=1
 }
 
-DEPENDENCIESCONFIG = shared recursive install_recurse
+DEPENDENCIESCONFIG = shared install_recurse
 
 ## Configuration for Visual Studio to install binaries and dependencies. Work also for QT Creator by replacing QMAKE_INSTALL
 PROJECTCONFIG = QTVS
 
 #NOTE : CONFIG as staticlib or sharedlib, DEPENDENCIESCONFIG as staticlib or sharedlib, QMAKE_TARGET.arch and PROJECTDEPLOYDIR MUST BE DEFINED BEFORE templatelibconfig.pri inclusion
-include ($$shell_quote($$shell_path($$(REMAKEN_RULES_ROOT)/qmake/templatelibconfig.pri)))  # Shell_quote & shell_path required for visual on windows
+include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/templatelibconfig.pri)))  # Shell_quote & shell_path required for visual on windows
 
 ## DEFINES FOR MSVC/INTEL C++ compilers
 msvc {
@@ -39,9 +39,23 @@ DEFINES += "_BCOM_SHARED=__declspec(dllexport)"
 
 INCLUDEPATH += interfaces/
 
-include (SolARModuleNonFreeOpenCV.pri)
+HEADERS += interfaces/SolAROpencvNonFreeAPI.h \
+interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
+interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
+interfaces/SolARKeypointDetectorNonFreeOpencv.h \
+    interfaces/SolARModuleNonFreeOpencv_traits.h \
+    interfaces/SolARNonFreeOpenCVHelper.h
+
+SOURCES += src/SolARModuleNonFreeOpencv.cpp \
+    src/SolARDescriptorsExtractorSURF64Opencv.cpp \
+    src/SolARDescriptorsExtractorSURF128Opencv.cpp \
+    src/SolARKeypointDetectorNonFreeOpencv.cpp \
+    src/SolARNonFreeOpenCVHelper.cpp
  
-unix {
+unix:!android {
+    QMAKE_CXXFLAGS += -Wignored-qualifiers
+#    QMAKE_LINK=clang++
+#    QMAKE_CXX = clang++
 }
 
 macx {
@@ -57,7 +71,12 @@ win32 {
 
     DEFINES += WIN64 UNICODE _UNICODE
     QMAKE_COMPILER_DEFINES += _WIN64
-    QMAKE_CXXFLAGS += -wd4250 -wd4251 -wd4244 -wd4275
+    QMAKE_CXXFLAGS += -wd4250 -wd4251 -wd4244 -wd4275 /Od
+}
+
+android {
+    QMAKE_LFLAGS += -nostdlib++
+    ANDROID_ABIS="arm64-v8a"
 }
 
 header_files.path = $${PROJECTDEPLOYDIR}/interfaces
@@ -70,7 +89,12 @@ INSTALLS += header_files
 INSTALLS += xpcf_xml_files
 
 OTHER_FILES += \
-    packagedependencies.txt
+    packagedependencies.txt \
+    packagedependencies-linux.txt \
+    packagedependencies-win.txt \
+    packagedependencies-mac.txt \
+    packagedependencies-android.txt
 
 #NOTE : Must be placed at the end of the .pro
-include ($$shell_quote($$shell_path($$(REMAKEN_RULES_ROOT)/qmake/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows
+include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows
+s

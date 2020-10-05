@@ -3,8 +3,8 @@ QT       -= core gui
 CONFIG -= qt
 
 ## global defintions : target lib name, version
-TARGET = SolARDescriptorExtractorOpenCVNonFreeTest
-VERSION= 0.7.0
+TARGET = SolARNonFreeOpenCVDescriptorExtractor
+VERSION=0.8.0
 
 DEFINES += MYVERSION=$${VERSION}
 CONFIG += c++1z
@@ -24,7 +24,7 @@ CONFIG(release,debug|release) {
     DEFINES += NDEBUG=1
 }
 
-DEPENDENCIESCONFIG = shared install_recurse
+DEPENDENCIESCONFIG = sharedlib install_recurse
 
 win32:CONFIG -= static
 win32:CONFIG += shared
@@ -35,11 +35,17 @@ PROJECTCONFIG = QTVS
 #NOTE : CONFIG as staticlib or sharedlib, DEPENDENCIESCONFIG as staticlib or sharedlib, QMAKE_TARGET.arch and PROJECTDEPLOYDIR MUST BE DEFINED BEFORE templatelibconfig.pri inclusion
 include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/templateappconfig.pri)))  # Shell_quote & shell_path required for visual on windows
 
+#DEFINES += BOOST_ALL_NO_LIB
+DEFINES += BOOST_ALL_DYN_LINK
+DEFINES += BOOST_AUTO_LINK_NOMANGLE
+DEFINES += BOOST_LOG_DYN_LINK
+
 SOURCES += \
     main.cpp
 
 unix {
-LIBS += -ldl
+    LIBS += -ldl
+    QMAKE_CXXFLAGS += -DBOOST_ALL_DYN_LINK
 }
 
 macx {
@@ -61,6 +67,8 @@ configfile.path = $${TARGETDEPLOYDIR}/
 configfile.files = $${PWD}/SolAROpenCVNonFreeDescriptorExtractor_conf.xml
 INSTALLS += configfile
 
+DISTFILES += packagedependencies.txt
+
+
 #NOTE : Must be placed at the end of the .pro
 include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows
-

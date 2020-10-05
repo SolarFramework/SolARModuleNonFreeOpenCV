@@ -15,8 +15,7 @@
  */
 
 #include "SolARDescriptorsExtractorSURF128Opencv.h"
-#include "SolARImageConvertorOpencv.h"
-#include "SolAROpenCVHelper.h"
+#include "SolARNonFreeOpenCVHelper.h"
 #include <core/Log.h>
 
 XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF128Opencv);
@@ -25,7 +24,6 @@ namespace xpcf = org::bcom::xpcf;
 
 using namespace cv;
 using namespace cv::xfeatures2d;
-using namespace SolAR::MODULES::OPENCV;
 
 namespace SolAR {
 using namespace datastructure;
@@ -57,19 +55,46 @@ SolARDescriptorsExtractorSURF128Opencv::~SolARDescriptorsExtractorSURF128Opencv(
 
 void SolARDescriptorsExtractorSURF128Opencv::extract(const SRef<Image> image, const std::vector<Keypoint> & keypoints, SRef<DescriptorBuffer>& descriptors){
 
-
     //transform all SolAR data to openCv data
-    SRef<Image> convertedImage = image;
+/*    SRef<Image> convertedImage = image;
 
     if (image->getImageLayout() != Image::ImageLayout::LAYOUT_GREY) {
         // input Image not in grey levels : convert it !
-        SolARImageConvertorOpencv convertor;
         convertedImage = xpcf::utils::make_shared<Image>(Image::ImageLayout::LAYOUT_GREY,Image::PixelOrder::INTERLEAVED,image->getDataType());
-        convertor.convert(image,convertedImage);
+
+        convertedImage->setSize(image->getWidth(),image->getHeight());
+
+        cv::Mat imgSource, imgConverted;
+        SolARNonFreeOpenCVHelper::mapToOpenCV(image,imgSource);
+
+        SolARNonFreeOpenCVHelper::mapToOpenCV(convertedImage,imgConverted);
+
+        if (image->getImageLayout() == Image::ImageLayout::LAYOUT_RGB)
+            cv::cvtColor(imgSource, imgConverted, cv::COLOR_RGB2GRAY);
+        else
+            cv::cvtColor(imgSource, imgConverted, cv::COLOR_BGR2GRAY);
     }
 
     cv::Mat opencvImage;
-    SolAROpenCVHelper::mapToOpenCV(convertedImage,opencvImage);
+    SolARNonFreeOpenCVHelper::mapToOpenCV(convertedImage,opencvImage);
+*/
+    // Convert image in greyscale is not already done
+    cv::Mat opencvImage;
+    if (image->getImageLayout() != Image::ImageLayout::LAYOUT_GREY)
+    {
+        cv::Mat opencvColorImage;
+        SolARNonFreeOpenCVHelper::mapToOpenCV(image,opencvColorImage);
+        if (image->getImageLayout() == Image::ImageLayout::LAYOUT_RGB)
+            cv::cvtColor(opencvColorImage, opencvImage, cv::COLOR_RGB2GRAY);
+        else
+            cv::cvtColor(opencvColorImage, opencvImage, cv::COLOR_BGR2GRAY);
+
+    }
+    else
+    {
+        SolARNonFreeOpenCVHelper::mapToOpenCV(image,opencvImage);
+    }
+
 
     cv::Mat out_mat_descps;
 

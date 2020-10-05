@@ -15,13 +15,11 @@
  */
 
 #include "SolARKeypointDetectorNonFreeOpencv.h"
-#include "SolAROpenCVHelper.h"
+#include "SolARNonFreeOpenCVHelper.h"
 #include "core/Log.h"
 
 #include "xpcf/api/IComponentManager.h"
 
-
-#include "SolAROpencvAPI.h"
 #include <string>
 
 #include <iostream>
@@ -39,7 +37,6 @@ namespace xpcf = org::bcom::xpcf;
 
 using namespace cv;
 using namespace cv::xfeatures2d;
-using namespace SolAR::MODULES::OPENCV;
 
 namespace SolAR {
 using namespace datastructure;
@@ -49,11 +46,9 @@ namespace NONFREEOPENCV {
 
 
 
-static std::map<std::string,IKeypointDetector::KeypointDetectorType> stringToType = {{"SURF",IKeypointDetector::KeypointDetectorType::SURF},
-                                                                  {"SIFT",IKeypointDetector::KeypointDetectorType::SIFT}};
+static std::map<std::string,IKeypointDetector::KeypointDetectorType> stringToType = {{"SURF",IKeypointDetector::KeypointDetectorType::SURF}};
 
-static std::map<IKeypointDetector::KeypointDetectorType,std::string> typeToString = {{IKeypointDetector::KeypointDetectorType::SURF, "SURF"},
-                                                                  {IKeypointDetector::KeypointDetectorType::SIFT, "SIFT"}};
+static std::map<IKeypointDetector::KeypointDetectorType,std::string> typeToString = {{IKeypointDetector::KeypointDetectorType::SURF, "SURF"}};
 
 
 SolARKeypointDetectorNonFreeOpencv::SolARKeypointDetectorNonFreeOpencv():ConfigurableBase(xpcf::toUUID<SolARKeypointDetectorNonFreeOpencv>())
@@ -86,19 +81,13 @@ void SolARKeypointDetectorNonFreeOpencv::setType(KeypointDetectorType type)
 
     /*
      * 	SURF,
-        SIFT
-        */
+     */
     m_type=typeToString.at(type);
     switch (type) {
     case (KeypointDetectorType::SURF):
         LOG_DEBUG("KeypointDetectorImp::setType(SURF)");
         m_detector = SURF::create();
         break;
-    case (KeypointDetectorType::SIFT):
-        LOG_DEBUG("KeypointDetectorImp::setType(SIFT)");
-        m_detector = SIFT::create();
-        break;
-
     default :
         LOG_DEBUG("KeypointDetectorImp::setType(SURF DEFAULT)");
         m_detector=SURF::create();
@@ -122,10 +111,10 @@ void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> image, std::ve
     keypoints.clear();
 
     // instantiation of an opencv image from an input IImage
-    cv::Mat opencvImage = SolAROpenCVHelper::mapToOpenCV(image);
+    cv::Mat opencvImage = SolARNonFreeOpenCVHelper::mapToOpenCV(image);
 
     cv::Mat img_1;
-    cvtColor( opencvImage, img_1, CV_BGR2GRAY );
+    cvtColor( opencvImage, img_1, cv::COLOR_BGR2GRAY );
     cv::resize(img_1, img_1, Size(img_1.cols*m_imageRatio,img_1.rows*m_imageRatio), 0, 0);
 
 
@@ -148,10 +137,11 @@ void SolARKeypointDetectorNonFreeOpencv::detect(const SRef<Image> image, std::ve
 
     kptsFilter.retainBest(kpts,m_nbDescriptors);
 
+    int kpID=0;
     for(std::vector<cv::KeyPoint>::iterator itr=kpts.begin();itr!=kpts.end();++itr){
         Keypoint kpa = Keypoint();
 
-        kpa.init((*itr).pt.x*ratioInv,(*itr).pt.y*ratioInv,(*itr).size,(*itr).angle,(*itr).response,(*itr).octave,(*itr).class_id) ;
+        kpa.init(kpID++, (*itr).pt.x*ratioInv,(*itr).pt.y*ratioInv,(*itr).size,(*itr).angle,(*itr).response,(*itr).octave,(*itr).class_id) ;
         keypoints.push_back(kpa);
     }
 
