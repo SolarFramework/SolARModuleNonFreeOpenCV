@@ -71,7 +71,7 @@ xpcf::XPCFErrorCode SolARKeypointDetectorNonFreeOpencv::onConfigured()
 {
     LOG_DEBUG(" SolARKeypointDetectorOpencv onConfigured");
     setType(stringToType.at(m_type));
-    return xpcf::_SUCCESS;
+    return xpcf::XPCFErrorCode::_SUCCESS;
 }
 
 
