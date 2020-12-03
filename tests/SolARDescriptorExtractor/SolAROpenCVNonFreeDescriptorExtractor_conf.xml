@@ -36,21 +36,21 @@
         </configure>
         <configure component="SolARKeypointDetectorNonFreeOpencv">
             <property name="type" type="string" value="SURF"/>
-            <property name="imageRatio" type="Float" value="1.0"/>
-            <property name="nbDescriptors" type="Integer" value="1000"/>
+            <property name="imageRatio" type="float" value="1.0"/>
+            <property name="nbDescriptors" type="int" value="1000"/>
         </configure>
         <configure component="SolARDescriptorsExtractorSURF128Opencv">
-            <property name="hessianThreshold" type="Float" value="100"/>
-            <property name="nbOctaves" type="Float" value="4"/>
-            <property name="nbOctaveLayers" type="Float" value="3"/>
-            <property name="extended" type="Float" value="0"/>
-            <property name="upright" type="Float" value="0"/>
+            <property name="hessianThreshold" type="float" value="100"/>
+            <property name="nbOctaves" type="float" value="4"/>
+            <property name="nbOctaveLayers" type="float" value="3"/>
+            <property name="extended" type="float" value="0"/>
+            <property name="upright" type="float" value="0"/>
         </configure>
         <configure component="SolAR2DOverlayOpencv">
-            <property name="thickness" type="UnsignedInteger" value="2"/>
-            <property name="radius" type="UnsignedInteger" value="5"/>
-            <property name="randomColor" type="UnsignedInteger" value="1"/>
-            <property name="color"  type="UnsignedInteger">
+            <property name="thickness" type="uint" value="2"/>
+            <property name="radius" type="uint" value="5"/>
+            <property name="randomColor" type="uint" value="1"/>
+            <property name="color"  type="uint">
                 <value>0</value>
                 <value>0</value>
                 <value>255</value>
@@ -58,9 +58,9 @@
         </configure>
         <configure component="SolARImageViewerOpencv">
             <property name="title" type="string" value="Keypoints (press esc key to exit)"/>
-            <property name="exitKey" type="Integer" value="27"/>
-            <property name="width" type="Integer" value="0"/>
-            <property name="height" type="Integer" value="0"/>
+            <property name="exitKey" type="int" value="27"/>
+            <property name="width" type="int" value="0"/>
+            <property name="height" type="int" value="0"/>
         </configure>
     </properties>
 </xpcf-registry>
