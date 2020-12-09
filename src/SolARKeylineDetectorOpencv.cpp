@@ -15,13 +15,12 @@
  */
 
 #include "SolARKeylineDetectorOpencv.h"
-#include "SolAROpenCVHelper.h"
+#include "SolARNonFreeOpenCVHelper.h"
 #include "core/Log.h"
 
 XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARKeylineDetectorOpencv)
 
 namespace xpcf = org::bcom::xpcf;
-using namespace SolAR::MODULES::OPENCV;
 
 namespace SolAR {
 using namespace datastructure;
@@ -96,7 +95,7 @@ void SolARKeylineDetectorOpencv::detect(const SRef<Image> image, std::vector<Key
 
 	keylines.clear();
 
-	cv::Mat opencvImage = SolAROpenCVHelper::mapToOpenCV(image);
+	cv::Mat opencvImage = SolARNonFreeOpenCVHelper::mapToOpenCV(image);
 
 	cv::Mat img_1;
 	cv::resize(opencvImage, img_1, cv::Size(opencvImage.cols * m_imageRatio, opencvImage.rows * m_imageRatio), 0, 0);

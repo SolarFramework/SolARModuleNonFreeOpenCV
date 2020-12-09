@@ -15,13 +15,12 @@
  */
 
 #include "SolARDescriptorsExtractorBinaryOpencv.h"
-#include "SolAROpenCVHelper.h"
+#include "SolARNonFreeOpenCVHelper.h"
 #include "core/Log.h"
 
 XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorBinaryOpencv)
 
 namespace xpcf = org::bcom::xpcf;
-using namespace SolAR::MODULES::OPENCV;
 
 namespace SolAR {
 using namespace datastructure;
@@ -59,7 +58,7 @@ org::bcom::xpcf::XPCFErrorCode SolARDescriptorsExtractorBinaryOpencv::onConfigur
 void SolARDescriptorsExtractorBinaryOpencv::extract(const SRef<Image> image, const std::vector<Keyline>& keylines, SRef<DescriptorBuffer>& descriptors)
 {
 	cv::Mat opencvImage;
-	SolAROpenCVHelper::mapToOpenCV(image, opencvImage);
+	SolARNonFreeOpenCVHelper::mapToOpenCV(image, opencvImage);
 
 	cv::Mat img_1;
 	cv::resize(opencvImage, img_1, cv::Size(opencvImage.cols * m_imageRatio, opencvImage.rows * m_imageRatio), 0, 0);
@@ -97,7 +96,7 @@ void SolARDescriptorsExtractorBinaryOpencv::extract(const SRef<Image> image, con
 void SolARDescriptorsExtractorBinaryOpencv::compute(const SRef<Image> image, std::vector<Keyline>& keylines, SRef<DescriptorBuffer>& descriptors)
 {
 	cv::Mat opencvImage;
-	SolAROpenCVHelper::mapToOpenCV(image, opencvImage);
+	SolARNonFreeOpenCVHelper::mapToOpenCV(image, opencvImage);
 
 	cv::Mat img_1;
 	cv::resize(opencvImage, img_1, cv::Size(opencvImage.cols * m_imageRatio, opencvImage.rows * m_imageRatio), 0, 0);

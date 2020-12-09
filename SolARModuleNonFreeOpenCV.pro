@@ -39,18 +39,7 @@ DEFINES += "_BCOM_SHARED=__declspec(dllexport)"
 
 INCLUDEPATH += interfaces/
 
-HEADERS += interfaces/SolAROpencvNonFreeAPI.h \
-interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
-interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
-interfaces/SolARKeypointDetectorNonFreeOpencv.h \
-    interfaces/SolARModuleNonFreeOpencv_traits.h \
-    interfaces/SolARNonFreeOpenCVHelper.h
-
-SOURCES += src/SolARModuleNonFreeOpencv.cpp \
-    src/SolARDescriptorsExtractorSURF64Opencv.cpp \
-    src/SolARDescriptorsExtractorSURF128Opencv.cpp \
-    src/SolARKeypointDetectorNonFreeOpencv.cpp \
-    src/SolARNonFreeOpenCVHelper.cpp
+include (SolARModuleNonFreeOpenCV.pri)
  
 unix:!android {
     QMAKE_CXXFLAGS += -Wignored-qualifiers

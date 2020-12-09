@@ -18,7 +18,6 @@ namespace NONFREEOPENCV {
 
 class SolARDescriptorMatcherBinaryOpencv;
 class SolARDescriptorsExtractorBinaryOpencv;
-class SolARDescriptorsExtractorSIFTOpencv;
 class SolARDescriptorsExtractorSURF128Opencv;
 class SolARDescriptorsExtractorSURF64Opencv;
 class SolARKeylineDetectorOpencv;
@@ -36,11 +35,6 @@ XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtr
                              "ccf87cfe-446e-4bc2-8e79-c2eee71dbf4d",
                              "SolARDescriptorsExtractorBinaryOpencv",
                              "Extracts the Binary descriptors for a set of keylines.")
-
-XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSIFTOpencv,
-                             "3787eaa6-d0a0-11e7-8fab-cec278b6b50a",
-                             "SolARDescriptorsExtractorSIFTOpencv",
-                             "Extracts the SIFT descriptors for a set of keypoints.")
 
 XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF128Opencv,
                              "fe14a310-d0a2-11e7-8fab-cec278b6b50a",

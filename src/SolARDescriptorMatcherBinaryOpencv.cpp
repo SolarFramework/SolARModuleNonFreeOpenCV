@@ -15,7 +15,7 @@
  */
 
 #include "SolARDescriptorMatcherBinaryOpencv.h"
-#include "SolAROpenCVHelper.h"
+#include "SolARNonFreeOpenCVHelper.h"
 #include "SolAROpencvNonFreeAPI.h"
 #include "core/Log.h"
 
@@ -27,7 +27,6 @@ namespace SolAR {
 using namespace datastructure;
 using namespace api::features;
 namespace MODULES {
-using namespace OPENCV;
 namespace NONFREEOPENCV {
 
 SolARDescriptorMatcherBinaryOpencv::SolARDescriptorMatcherBinaryOpencv() : ConfigurableBase(xpcf::toUUID<SolARDescriptorMatcherBinaryOpencv>())
@@ -73,7 +72,7 @@ IDescriptorMatcher::RetCode SolARDescriptorMatcherBinaryOpencv::match(const SRef
 	}
 
 	// Mapping to OpenCV
-	uint32_t type_conversion = SolAROpenCVHelper::deduceOpenDescriptorCVType(descriptors1->getDescriptorDataType());
+	uint32_t type_conversion = SolARNonFreeOpenCVHelper::deduceOpenDescriptorCVType(descriptors1->getDescriptorDataType());
 
 	cv::Mat cvDescriptors1(descriptors1->getNbDescriptors(), descriptors1->getNbElements(), type_conversion);
 	cvDescriptors1.data = (uchar*)descriptors1->data();

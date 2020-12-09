@@ -18,7 +18,6 @@
 
 #include "SolARDescriptorMatcherBinaryOpencv.h"
 #include "SolARDescriptorsExtractorBinaryOpencv.h"
-#include "SolARDescriptorsExtractorSIFTOpencv.h"
 #include "SolARDescriptorsExtractorSURF128Opencv.h"
 #include "SolARDescriptorsExtractorSURF64Opencv.h"
 #include "SolARKeylineDetectorOpencv.h"
@@ -41,10 +40,6 @@ extern "C" XPCF_MODULEHOOKS_API xpcf::XPCFErrorCode XPCF_getComponent(const boos
 	}
     if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
     {
-        errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSIFTOpencv>(componentUUID,interfaceRef);
-    }
-    if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
-    {
         errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF128Opencv>(componentUUID,interfaceRef);
     }
     if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
@@ -65,7 +60,6 @@ extern "C" XPCF_MODULEHOOKS_API xpcf::XPCFErrorCode XPCF_getComponent(const boos
 XPCF_BEGIN_COMPONENTS_DECLARATION
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorMatcherBinaryOpencv)
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorBinaryOpencv)
-XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSIFTOpencv)
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF128Opencv)
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF64Opencv)
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARKeylineDetectorOpencv)
