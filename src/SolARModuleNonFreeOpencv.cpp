@@ -16,8 +16,12 @@
 
 #include "xpcf/module/ModuleFactory.h"
 
+#include "SolARDescriptorMatcherBinaryOpencv.h"
+#include "SolARDescriptorsExtractorBinaryOpencv.h"
+#include "SolARDescriptorsExtractorSIFTOpencv.h"
 #include "SolARDescriptorsExtractorSURF128Opencv.h"
 #include "SolARDescriptorsExtractorSURF64Opencv.h"
+#include "SolARKeylineDetectorOpencv.h"
 #include "SolARKeypointDetectorNonFreeOpencv.h"
 
 
@@ -29,13 +33,28 @@ extern "C" XPCF_MODULEHOOKS_API xpcf::XPCFErrorCode XPCF_getComponent(const boos
 {
 
     xpcf::XPCFErrorCode errCode = xpcf::XPCFErrorCode::_FAIL;
-    errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF128Opencv>(componentUUID,interfaceRef);
-  
+    errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARDescriptorMatcherBinaryOpencv>(componentUUID,interfaceRef);
+
+	if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
+	{
+		errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorBinaryOpencv>(componentUUID, interfaceRef);
+	}
+    if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
+    {
+        errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSIFTOpencv>(componentUUID,interfaceRef);
+    }
+    if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
+    {
+        errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF128Opencv>(componentUUID,interfaceRef);
+    }
     if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
     {
         errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF64Opencv>(componentUUID,interfaceRef);
     }
-
+    if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
+    {
+        errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARKeylineDetectorOpencv>(componentUUID,interfaceRef);
+    }
     if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
     {
         errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARKeypointDetectorNonFreeOpencv>(componentUUID,interfaceRef);
@@ -44,7 +63,11 @@ extern "C" XPCF_MODULEHOOKS_API xpcf::XPCFErrorCode XPCF_getComponent(const boos
 }
 
 XPCF_BEGIN_COMPONENTS_DECLARATION
+XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorMatcherBinaryOpencv)
+XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorBinaryOpencv)
+XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSIFTOpencv)
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF128Opencv)
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF64Opencv)
+XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARKeylineDetectorOpencv)
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARKeypointDetectorNonFreeOpencv)
 XPCF_END_COMPONENTS_DECLARATION
