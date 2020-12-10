@@ -3,24 +3,19 @@
 #include <boost/log/core.hpp>
 #include <core/Log.h>
 
-#include "SolARModuleOpencv_traits.h"
-
 #include "api/display/I2DOverlay.h"
 #include "api/display/IImageViewer.h"
 #include "api/features/IKeylineDetector.h"
 #include "api/image/IImageLoader.h"
 #include "api/input/devices/ICamera.h"
 
-#include "SolAROpenCVHelper.h"
-
-#include <opencv2/line_descriptor.hpp>
+#include "SolARNonFreeOpenCVHelper.h"
 
 namespace xpcf=org::bcom::xpcf;
 
 using namespace SolAR;
 using namespace SolAR::datastructure;
 using namespace SolAR::api;
-using namespace SolAR::MODULES::OPENCV;
 
 #define WEBCAM 1
 

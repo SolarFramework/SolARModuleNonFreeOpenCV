@@ -21,6 +21,8 @@
 XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARKeylineDetectorOpencv)
 
 namespace xpcf = org::bcom::xpcf;
+using namespace cv::line_descriptor;
+using namespace cv::ximgproc;
 
 namespace SolAR {
 using namespace datastructure;
@@ -28,11 +30,13 @@ namespace MODULES {
 namespace NONFREEOPENCV {
 
 static std::map<std::string, IKeylineDetector::KeylineDetectorType> stringToType = {
+	{ "FLD", IKeylineDetector::KeylineDetectorType::FLD },
 	{ "LSD", IKeylineDetector::KeylineDetectorType::LSD },
 	{ "MSLD", IKeylineDetector::KeylineDetectorType::MSLD }
 };
 
 static std::map<IKeylineDetector::KeylineDetectorType, std::string> typeToString = {
+	{ IKeylineDetector::KeylineDetectorType::FLD, "FLD" },
 	{ IKeylineDetector::KeylineDetectorType::LSD, "LSD" },
 	{ IKeylineDetector::KeylineDetectorType::MSLD, "MSLD" }
 };
@@ -57,7 +61,7 @@ SolARKeylineDetectorOpencv::~SolARKeylineDetectorOpencv()
 xpcf::XPCFErrorCode SolARKeylineDetectorOpencv::onConfigured()
 {
 	LOG_DEBUG("SolARKeylineDetectorOpencv onConfigured");
-	if (stringToType.find(m_type) != stringToType.end())
+	if (stringToType.find(m_type) != stringToType.end()) // TODO better detector type handling
 	{
 		setType(stringToType.at(m_type));
 		return xpcf::_SUCCESS;
@@ -69,18 +73,23 @@ xpcf::XPCFErrorCode SolARKeylineDetectorOpencv::onConfigured()
 	}
 }
 
-void SolARKeylineDetectorOpencv::setType(KeylineDetectorType type)
+void SolARKeylineDetectorOpencv::setType(KeylineDetectorType type) // TODO RENAME init detector
 {
 	switch (type)
 	{
-	case (KeylineDetectorType::LSD):
-		LOG_DEBUG("KeylineDetectorType::setType(LSD)");
-		m_detector = cv::line_descriptor::LSDDetector::createLSDDetector();
-		// /!\ LineSegmentDetector is no longer implemented in OpenCV >= 4 /!\ 
+	case (KeylineDetectorType::FLD):
+		LOG_DEBUG("KeylineDetectorType::setType(FLD) - Fast Line Detector");
+		m_detector = createFastLineDetector(m_minLineLength);
+		break;
+	case (KeylineDetectorType::LSD): /* /!\ LSD is no longer implemented in OpenCV >= 4 /!\ */
+		LOG_DEBUG("KeylineDetectorType::setType(LSD) - Line Segment Detector");
+		m_detector = LSDDetector::createLSDDetector();
 		break;
 	case (KeylineDetectorType::MSLD):
-		LOG_DEBUG("KeylineDetectorType::setType(MSLD) not implemented");
+		LOG_DEBUG("KeylineDetectorType::setType(MSLD) - Multi Scale Line Detector not implemented");
 		break;
+	default:
+		LOG_WARNING("Failed to initialize detector - unknown type");
 	}
 }
 
@@ -93,56 +102,82 @@ void SolARKeylineDetectorOpencv::detect(const SRef<Image> image, std::vector<Key
 {
 	float ratioInv = 1.f / m_imageRatio;
 
-	keylines.clear();
+	keylines.clear(); // TODO: needed ?
 
 	cv::Mat opencvImage = SolARNonFreeOpenCVHelper::mapToOpenCV(image);
+	cv::cvtColor(opencvImage, opencvImage, cv::COLOR_BGR2GRAY);
+	cv::resize(opencvImage, opencvImage, cv::Size(), m_imageRatio, m_imageRatio);
 
-	cv::Mat img_1;
-	cv::resize(opencvImage, img_1, cv::Size(opencvImage.cols * m_imageRatio, opencvImage.rows * m_imageRatio), 0, 0);
-
-	std::vector<cv::line_descriptor::KeyLine> cvKeylines;
 	try
 	{
 		if (!m_detector)
 		{
-			LOG_DEBUG(" detector is initialiazed with default value : {}", m_type);
-			setType(stringToType.at(m_type));
+			LOG_ERROR(" detector is not initialized!");
+			return;
 		}
-		m_detector->detect(img_1, cvKeylines, m_scale, m_numOctave, cv::Mat());
+		switch (stringToType.at(m_type))
+		{
+		case KeylineDetectorType::FLD:
+		{
+			// Perform keyline detection
+			std::vector<cv::Vec4f> cvKeylines;
+			m_detector.dynamicCast<FastLineDetector>()
+				->detect(opencvImage, cvKeylines);
+			// Convert to SolAR Keylines
+			keylines.resize(cvKeylines.size());
+			std::transform(cvKeylines.begin(), cvKeylines.end(), keylines.begin(),
+				[ratioInv](const auto& kl)
+			{
+				return Keyline( // TODO compute other keyline params (length, midpoint, angle,... ?)
+					kl[0] * ratioInv, kl[1] * ratioInv,		// startPoint
+					kl[2] * ratioInv, kl[3] * ratioInv		// endPoint
+				);
+			});
+			break;
+		}
+		case KeylineDetectorType::LSD:
+		{
+			// Perform keyline detection
+			std::vector<KeyLine> cvKeylines;
+			m_detector.dynamicCast<LSDDetector>()
+				->detect(opencvImage, cvKeylines, m_scale, m_numOctave, cv::Mat());
+			// Convert to SolAR Keylines
+			for (const auto& kl : cvKeylines)
+			{
+				float length = kl.lineLength * ratioInv;
+				if (length < m_minLineLength) continue;
+
+				Keyline kli;
+				kli.init(
+					kl.pt.x * ratioInv,
+					kl.pt.y * ratioInv,
+					kl.getStartPoint().x * ratioInv,
+					kl.getStartPoint().y * ratioInv,
+					kl.getStartPointInOctave().x * ratioInv,
+					kl.getStartPointInOctave().y * ratioInv,
+					kl.getEndPoint().x * ratioInv,
+					kl.getEndPoint().y * ratioInv,
+					kl.getEndPointInOctave().x * ratioInv,
+					kl.getEndPointInOctave().y * ratioInv,
+					length,
+					kl.size * ratioInv,
+					kl.angle,
+					kl.response,
+					kl.numOfPixels * ratioInv,
+					kl.octave,
+					kl.class_id
+				);
+				keylines.push_back(kli);
+			}
+			break;
+		}
+		}
 	}
 	catch (cv::Exception & e)
 	{
 		LOG_ERROR("Feature: {}", m_detector->getDefaultName().c_str());
 		LOG_ERROR("{}", e.msg);
 		return;
-	}
-
-	for (int i = 0; i < cvKeylines.size(); i++)
-	{
-		if (cvKeylines[i].lineLength * ratioInv <= m_minLineLength)
-			continue;
-
-		Keyline kli;
-		kli.init(
-			cvKeylines[i].pt.x * ratioInv,
-			cvKeylines[i].pt.y * ratioInv,
-			cvKeylines[i].getStartPoint().x * ratioInv,
-			cvKeylines[i].getStartPoint().y * ratioInv,
-			cvKeylines[i].getStartPointInOctave().x * ratioInv,
-			cvKeylines[i].getStartPointInOctave().y * ratioInv,
-			cvKeylines[i].getEndPoint().x * ratioInv,
-			cvKeylines[i].getEndPoint().y * ratioInv,
-			cvKeylines[i].getEndPointInOctave().x * ratioInv,
-			cvKeylines[i].getEndPointInOctave().y * ratioInv,
-			cvKeylines[i].lineLength * ratioInv,
-			cvKeylines[i].size * ratioInv,
-			cvKeylines[i].angle,
-			cvKeylines[i].response,
-			cvKeylines[i].numOfPixels * ratioInv,
-			cvKeylines[i].octave,
-			cvKeylines[i].class_id
-		);
-		keylines.push_back(kli);
 	}
 }
 

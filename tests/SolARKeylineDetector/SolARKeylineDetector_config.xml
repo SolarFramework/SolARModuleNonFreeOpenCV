@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <xpcf-registry autoAlias="true">
-    <module uuid="15e1990b-86b2-445c-8194-0cbe80ede970" name="SolARModuleOpenCV" description="SolARModuleOpenCV" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleOpenCV/0.8.0/lib/x86_64/shared">
+    <module uuid="15e1990b-86b2-445c-8194-0cbe80ede970" name="SolARModuleOpenCV" description="SolARModuleOpenCV" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleOpenCV/0.9.2/lib/x86_64/shared">
         <component uuid="5B7396F4-A804-4F3C-A0EB-FB1D56042BB4" name="SolARCameraOpencv" description="SolARCameraOpencv">
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="5DDC7DF0-8377-437F-9C81-3643F7676A5B" name="ICamera" description="ICamera"/>
@@ -18,7 +18,7 @@
             <interface uuid="b05f3dbb-f93d-465c-aee1-fb58e1480c42" name="IImageViewer" description="IImageViewer"/>
         </component>
     </module>
-    <module uuid="28b89d39-41bd-451d-b19e-d25a3d7c5797" name="SolARModuleNonFreeOpenCV" description="SolARModuleNonFreeOpenCV" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleNonFreeOpenCV/0.8.0/lib/x86_64/shared">
+    <module uuid="28b89d39-41bd-451d-b19e-d25a3d7c5797" name="SolARModuleNonFreeOpenCV" description="SolARModuleNonFreeOpenCV" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleNonFreeOpenCV/0.9.2/lib/x86_64/shared">
         <component uuid="be7c9a63-844e-42e2-8efb-e4848f94fbeb" name="SolARKeylineDetectorOpencv" description="SolARKeylineDetectorOpencv">
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="e60589f3-46fe-40c3-b624-389e08682751" name="IKeylineDetector" description="IKeylineDetector"/>
@@ -33,7 +33,7 @@
             <property name="filePath" type="string" value="../../data/Image1.png"/>
         </configure>
         <configure component="SolARKeylineDetectorOpencv"> <!-- SolARKeylineDetectorOpencv -->
-            <property name="type" type="string" value="LSD"/>
+            <property name="type" type="string" value="FLD"/>
             <property name="imageRatio" type="Float" value="1"/>
             <property name="scale" type="Integer" value="2"/>
             <property name="numOctave" type="Integer" value="1"/>

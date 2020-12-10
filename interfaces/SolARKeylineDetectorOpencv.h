@@ -22,8 +22,10 @@
 #include "xpcf/component/ConfigurableBase.h"
 #include "SolAROpencvNonFreeAPI.h"
 
-#include "opencv2/opencv.hpp"
-#include "opencv2/line_descriptor.hpp"
+// Line Segment Detector (FIXME: seem unaccessible in OpenCV 4+)
+#include <opencv2/line_descriptor.hpp>
+// Fast Line Detector
+#include <opencv2/ximgproc.hpp>
 
 namespace SolAR {
 using namespace datastructure;
@@ -55,9 +57,9 @@ public:
 	void detect(const SRef<Image> image, std::vector<Keyline> & keylines) override;
 
 private:
-	std::string m_type = "LSD";
-	cv::Ptr<cv::line_descriptor::LSDDetector> m_detector;
-	
+	cv::Ptr<cv::Algorithm> m_detector;
+
+	std::string m_type = "FLD";
 	float m_imageRatio = 1.0f;
 	int m_scale = 2;
 	int m_numOctave = 1;
