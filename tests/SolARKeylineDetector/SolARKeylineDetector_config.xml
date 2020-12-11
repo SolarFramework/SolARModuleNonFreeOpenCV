@@ -36,7 +36,7 @@
             <property name="type" type="string" value="FLD"/>
             <property name="imageRatio" type="Float" value="1"/>
             <property name="scale" type="Integer" value="2"/>
-            <property name="numOctave" type="Integer" value="1"/>
+            <property name="numOctaves" type="Integer" value="1"/>
             <property name="minLineLength" type="Integer" value="10"/>
         </configure>
         <configure component="SolAR2DOverlayOpencv"> <!-- SolAR2DOverlayOpencv -->
@@ -50,7 +50,7 @@
             </property>
         </configure>
         <configure component="SolARImageViewerOpencv"> <!-- SolARImageViewerOpencv -->
-            <property name="title" type="string" value="LSD Line Detector (press esc key to exit)"/>
+            <property name="title" type="string" value="Line Detector (press esc key to exit)"/>
             <property name="exitKey" type="Integer" value="27"/>
             <property name="width" type="Integer" value="0"/>
             <property name="height" type="Integer" value="0"/>

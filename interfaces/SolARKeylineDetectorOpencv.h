@@ -57,12 +57,17 @@ public:
 	void detect(const SRef<Image> image, std::vector<Keyline> & keylines) override;
 
 private:
+	std::vector<cv::Mat> computeGaussianPyramid(const cv::Mat & opencvImage, int numOctaves, int scale);
+
+	cv::line_descriptor::KeyLine createCvKeyline(const cv::Vec4f & line);
+	Keyline createKeyline(const cv::line_descriptor::KeyLine & cvKeyline);
+
 	cv::Ptr<cv::Algorithm> m_detector;
 
 	std::string m_type = "FLD";
 	float m_imageRatio = 1.0f;
 	int m_scale = 2;
-	int m_numOctave = 1;
+	int m_numOctaves = 1;
 	int m_minLineLength = 0;
 };
 }

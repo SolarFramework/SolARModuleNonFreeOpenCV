@@ -47,7 +47,7 @@ SolARKeylineDetectorOpencv::SolARKeylineDetectorOpencv() : ConfigurableBase(xpcf
 
 	declareProperty("imageRatio", m_imageRatio);
 	declareProperty("scale", m_scale);
-	declareProperty("numOctave", m_numOctave);
+	declareProperty("numOctaves", m_numOctaves);
 	declareProperty("type", m_type);
 	declareProperty("minLineLength", m_minLineLength);
 	LOG_DEBUG("SolARKeylineDetectorOpencv constructor");
@@ -81,7 +81,7 @@ void SolARKeylineDetectorOpencv::setType(KeylineDetectorType type) // TODO RENAM
 		LOG_DEBUG("KeylineDetectorType::setType(FLD) - Fast Line Detector");
 		m_detector = createFastLineDetector(m_minLineLength);
 		break;
-	case (KeylineDetectorType::LSD): /* /!\ LSD is no longer implemented in OpenCV >= 4 /!\ */
+	case (KeylineDetectorType::LSD): /* /!\ LSD implementation has been removed in OpenCV 4+ /!\ */
 		LOG_DEBUG("KeylineDetectorType::setType(LSD) - Line Segment Detector");
 		m_detector = LSDDetector::createLSDDetector();
 		break;
@@ -105,9 +105,12 @@ void SolARKeylineDetectorOpencv::detect(const SRef<Image> image, std::vector<Key
 	keylines.clear(); // TODO: needed ?
 
 	cv::Mat opencvImage = SolARNonFreeOpenCVHelper::mapToOpenCV(image);
-	cv::cvtColor(opencvImage, opencvImage, cv::COLOR_BGR2GRAY);
 	cv::resize(opencvImage, opencvImage, cv::Size(), m_imageRatio, m_imageRatio);
+	// Conversion to grayscale
+	if (opencvImage.channels() != 1)
+		cv::cvtColor(opencvImage, opencvImage, cv::COLOR_BGR2GRAY);
 
+	std::vector<KeyLine> cvKeylines;
 	try
 	{
 		if (!m_detector)
@@ -117,60 +120,91 @@ void SolARKeylineDetectorOpencv::detect(const SRef<Image> image, std::vector<Key
 		}
 		switch (stringToType.at(m_type))
 		{
-		case KeylineDetectorType::FLD:
+		case KeylineDetectorType::FLD: // TODO: Check->This implementation should be license free
 		{
-			// Perform keyline detection
-			std::vector<cv::Vec4f> cvKeylines;
-			m_detector.dynamicCast<FastLineDetector>()
-				->detect(opencvImage, cvKeylines);
-			// Convert to SolAR Keylines
-			keylines.resize(cvKeylines.size());
-			std::transform(cvKeylines.begin(), cvKeylines.end(), keylines.begin(),
-				[ratioInv](const auto& kl)
+			// Prepare different scale/octave
+			std::vector<std::vector<cv::Vec4f>> lines;
+			lines.resize(m_numOctaves);
+			std::vector<cv::Mat> gaussianPyrs = computeGaussianPyramid(opencvImage, m_numOctaves, m_scale);
+			// Perform line detection on each octave
+			int class_counter = -1;
+			for (unsigned i = 0; i < m_numOctaves; ++i)
 			{
-				return Keyline( // TODO compute other keyline params (length, midpoint, angle,... ?)
-					kl[0] * ratioInv, kl[1] * ratioInv,		// startPoint
-					kl[2] * ratioInv, kl[3] * ratioInv		// endPoint
-				);
-			});
+				m_detector.dynamicCast<FastLineDetector>()
+					->detect(gaussianPyrs[i], lines[i]);
+			}
+			// Create keylines
+			float octaveScale = 1.f;
+			for (unsigned i = 0; i < m_numOctaves; ++i)
+			{
+				for (const auto& l : lines[i])
+				{
+					KeyLine kl;
+					/* fill KeyLine's fields */
+					kl.startPointX = l[0] * octaveScale;
+					kl.startPointY = l[1] * octaveScale;
+					kl.endPointX = l[2] * octaveScale;
+					kl.endPointY = l[3] * octaveScale;
+					kl.sPointInOctaveX = l[0];
+					kl.sPointInOctaveY = l[1];
+					kl.ePointInOctaveX = l[2];
+					kl.ePointInOctaveY = l[3];
+					kl.lineLength = std::sqrtf(std::powf(l[0] - l[2], 2.f) + std::powf(l[1] - l[3], 2.f));
+
+					/* compute number of pixels covered by line */
+					cv::LineIterator li(gaussianPyrs[i], cv::Point2f(l[0], l[1]), cv::Point2f(l[2], l[3]));
+					kl.numOfPixels = li.count;
+
+					kl.angle = std::atan2f((kl.endPointY - kl.startPointY), (kl.endPointX - kl.startPointX));
+					kl.class_id = ++class_counter;
+					kl.octave = i;
+					kl.size = (kl.endPointX - kl.startPointX) * (kl.endPointY - kl.startPointY);
+					kl.response = kl.lineLength / std::max(gaussianPyrs[i].cols, gaussianPyrs[i].rows);
+					kl.pt = cv::Point2f((kl.endPointX + kl.startPointX) / 2.f, (kl.endPointY + kl.startPointY) / 2.f);
+
+					cvKeylines.push_back(kl);
+				}
+				// Prepare next octave scale factor
+				if (i < m_numOctaves - 1)
+					octaveScale *= m_scale;
+			}
 			break;
 		}
 		case KeylineDetectorType::LSD:
 		{
 			// Perform keyline detection
-			std::vector<KeyLine> cvKeylines;
 			m_detector.dynamicCast<LSDDetector>()
-				->detect(opencvImage, cvKeylines, m_scale, m_numOctave, cv::Mat());
-			// Convert to SolAR Keylines
-			for (const auto& kl : cvKeylines)
-			{
-				float length = kl.lineLength * ratioInv;
-				if (length < m_minLineLength) continue;
-
-				Keyline kli;
-				kli.init(
-					kl.pt.x * ratioInv,
-					kl.pt.y * ratioInv,
-					kl.getStartPoint().x * ratioInv,
-					kl.getStartPoint().y * ratioInv,
-					kl.getStartPointInOctave().x * ratioInv,
-					kl.getStartPointInOctave().y * ratioInv,
-					kl.getEndPoint().x * ratioInv,
-					kl.getEndPoint().y * ratioInv,
-					kl.getEndPointInOctave().x * ratioInv,
-					kl.getEndPointInOctave().y * ratioInv,
-					length,
-					kl.size * ratioInv,
-					kl.angle,
-					kl.response,
-					kl.numOfPixels * ratioInv,
-					kl.octave,
-					kl.class_id
-				);
-				keylines.push_back(kli);
-			}
+				->detect(opencvImage, cvKeylines, m_scale, m_numOctaves, cv::Mat());
 			break;
 		}
+		}
+		// Convert to SolAR Keylines
+		for (const auto& kl : cvKeylines)
+		{
+			float length = kl.lineLength * ratioInv;
+			if (length < m_minLineLength) continue;
+
+			Keyline kli;
+			kli.init(
+				kl.pt.x * ratioInv,
+				kl.pt.y * ratioInv,
+				kl.getStartPoint().x * ratioInv,
+				kl.getStartPoint().y * ratioInv,
+				kl.getStartPointInOctave().x * ratioInv,
+				kl.getStartPointInOctave().y * ratioInv,
+				kl.getEndPoint().x * ratioInv,
+				kl.getEndPoint().y * ratioInv,
+				kl.getEndPointInOctave().x * ratioInv,
+				kl.getEndPointInOctave().y * ratioInv,
+				length,
+				kl.size * ratioInv,
+				kl.angle,
+				kl.response,
+				kl.numOfPixels * ratioInv,
+				kl.octave,
+				kl.class_id
+			);
+			keylines.push_back(kli);
 		}
 	}
 	catch (cv::Exception & e)
@@ -179,6 +213,20 @@ void SolARKeylineDetectorOpencv::detect(const SRef<Image> image, std::vector<Key
 		LOG_ERROR("{}", e.msg);
 		return;
 	}
+}
+
+std::vector<cv::Mat> SolARKeylineDetectorOpencv::computeGaussianPyramid(const cv::Mat & opencvImage, int numOctaves, int scale)
+{
+	std::vector<cv::Mat> gaussianPyrs;
+	gaussianPyrs.resize(numOctaves);
+	cv::Mat currentImg = opencvImage.clone();
+	gaussianPyrs[0] = currentImg;
+	for (unsigned i = 1; i < numOctaves; ++i)
+	{
+		cv::pyrDown( currentImg, currentImg, cv::Size(currentImg.cols / scale, currentImg.rows / scale) );
+		gaussianPyrs[i] = currentImg;
+	}
+	return gaussianPyrs;
 }
 
 }
