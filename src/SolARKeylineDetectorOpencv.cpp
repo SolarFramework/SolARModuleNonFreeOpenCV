@@ -128,14 +128,14 @@ void SolARKeylineDetectorOpencv::detect(const SRef<Image> image, std::vector<Key
 			std::vector<cv::Mat> gaussianPyrs = computeGaussianPyramid(opencvImage, m_numOctaves, m_scale);
 			// Perform line detection on each octave
 			int class_counter = -1;
-			for (unsigned i = 0; i < m_numOctaves; ++i)
+			for (int i = 0; i < m_numOctaves; ++i)
 			{
 				m_detector.dynamicCast<FastLineDetector>()
 					->detect(gaussianPyrs[i], lines[i]);
 			}
 			// Create keylines
 			float octaveScale = 1.f;
-			for (unsigned i = 0; i < m_numOctaves; ++i)
+			for (int i = 0; i < m_numOctaves; ++i)
 			{
 				for (const auto& l : lines[i])
 				{
@@ -221,7 +221,7 @@ std::vector<cv::Mat> SolARKeylineDetectorOpencv::computeGaussianPyramid(const cv
 	gaussianPyrs.resize(numOctaves);
 	cv::Mat currentImg = opencvImage.clone();
 	gaussianPyrs[0] = currentImg;
-	for (unsigned i = 1; i < numOctaves; ++i)
+	for (int i = 1; i < numOctaves; ++i)
 	{
 		cv::pyrDown( currentImg, currentImg, cv::Size(currentImg.cols / scale, currentImg.rows / scale) );
 		gaussianPyrs[i] = currentImg;

@@ -62,8 +62,8 @@ void SolARDescriptorsExtractorBinaryOpencv::extract(const SRef<Image> image, con
 
 	cv::Mat img_1;
 	cv::resize(opencvImage, img_1, cv::Size(opencvImage.cols * m_imageRatio, opencvImage.rows * m_imageRatio), 0, 0);
-	float ratioInv = 1.f / m_imageRatio;
-	
+	// TODO: need to be converted to grayscale ?
+
 	cv::Mat cvDescriptors;
 	std::vector<cv::line_descriptor::KeyLine> cvKeylines;
 	for (int i = 0; i < keylines.size(); i++)

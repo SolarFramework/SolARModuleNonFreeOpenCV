@@ -54,13 +54,11 @@ macx {
 }
 
 win32 {
-    QMAKE_LFLAGS += /MACHINE:X64
     DEFINES += WIN64 UNICODE _UNICODE
     QMAKE_COMPILER_DEFINES += _WIN64
-
-    # Windows Kit (msvc2013 64)
-    LIBS += -L$$(WINDOWSSDKDIR)lib/winv6.3/um/x64 -lshell32 -lgdi32 -lComdlg32
-    INCLUDEPATH += $$(WINDOWSSDKDIR)lib/winv6.3/um/x64
+    QMAKE_CXXFLAGS += -wd4250 -wd4251 -wd4244 -wd4275
+    QMAKE_CXXFLAGS_DEBUG += /Od
+    QMAKE_CXXFLAGS_RELEASE += /O2
 }
 
 configfile.path = $${TARGETDEPLOYDIR}/

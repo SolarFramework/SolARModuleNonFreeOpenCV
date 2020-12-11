@@ -59,17 +59,17 @@ public:
 										std::vector<DescriptorMatch> & matches) override;
 
 	IDescriptorMatcher::RetCode match(
-		const SRef<DescriptorBuffer> descriptors1,
-		const std::vector<SRef<DescriptorBuffer>> & descriptors2,
-		std::vector<DescriptorMatch> & matches
-	)
+		[[maybe_unused]] const SRef<DescriptorBuffer> descriptors1,
+		[[maybe_unused]] const std::vector<SRef<DescriptorBuffer>> & descriptors2,
+		[[maybe_unused]] std::vector<DescriptorMatch> & matches)
 	{ return RetCode::DESCRIPTORS_MATCHER_OK; };
 
-	IDescriptorMatcher::RetCode matchInRegion(	const std::vector<Point2Df> & points2D,
-												const std::vector<SRef<DescriptorBuffer>> & descriptors,
-												const SRef<Frame> frame,
-												std::vector<DescriptorMatch> &matches,
-												const float radius)
+	IDescriptorMatcher::RetCode matchInRegion(
+		[[maybe_unused]] const std::vector<Point2Df> & points2D,
+		[[maybe_unused]] const std::vector<SRef<DescriptorBuffer>> & descriptors,
+		[[maybe_unused]] const SRef<Frame> frame,
+		[[maybe_unused]] std::vector<DescriptorMatch> &matches,
+		[[maybe_unused]] const float radius)
 	{ return RetCode::DESCRIPTORS_MATCHER_OK; };
 
 private:
