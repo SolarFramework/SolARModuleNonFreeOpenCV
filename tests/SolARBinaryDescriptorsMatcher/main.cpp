@@ -3,28 +3,24 @@
 #include <boost/log/core.hpp>
 #include <core/Log.h>
 
-#include "SolARModuleOpencv_traits.h"
-
 #include "api/display/IImageViewer.h"
 #include "api/display/IMatchesOverlay.h"
 #include "api/features/IDescriptorMatcher.h"
 #include "api/features/IDescriptorsExtractorBinary.h"
+#include "api/features/IKeylineDetector.h"
 #include "api/features/IMatchesFilter.h"
 #include "api/image/IImageLoader.h"
 #include "api/input/devices/ICamera.h"
 
-#include "SolAROpenCVHelper.h"
-
-#include <opencv2/line_descriptor.hpp>
+#include "SolARNonFreeOpenCVHelper.h"
 
 namespace xpcf=org::bcom::xpcf;
 
 using namespace SolAR;
 using namespace SolAR::datastructure;
 using namespace SolAR::api;
-using namespace SolAR::MODULES::OPENCV;
 
-#define WEBCAM
+#define WEBCAM 1
 
 /**
  * Declare module.
@@ -51,11 +47,13 @@ int main(int argc, char *argv[])
 		// declare and create components
         LOG_INFO("Start creating components");
 
+#if WEBCAM
 		SRef<input::devices::ICamera> camera = xpcfComponentManager->resolve<input::devices::ICamera>();
-		SRef<image::IImageLoader> imageLoader1 = xpcfComponentManager->resolve<image::IImageLoader>();
-		imageLoader1->bindTo<xpcf::IConfigurable>()->configure("SolARBinaryDescriptorsMatcher_config.xml", "image1");
-		SRef<image::IImageLoader> imageLoader2 = xpcfComponentManager->resolve<image::IImageLoader>();
-		imageLoader2->bindTo<xpcf::IConfigurable>()->configure("SolARBinaryDescriptorsMatcher_config.xml", "image2");
+#else // !WEBCAM
+		SRef<image::IImageLoader> imageLoader1 = xpcfComponentManager->resolve<image::IImageLoader>("image1");
+		SRef<image::IImageLoader> imageLoader2 = xpcfComponentManager->resolve<image::IImageLoader>("image1");
+#endif // WEBCAM
+		SRef<features::IKeylineDetector> keylineDetector = xpcfComponentManager->resolve<features::IKeylineDetector>();
 		SRef<features::IDescriptorsExtractorBinary> descriptorsExtractor = xpcfComponentManager->resolve<features::IDescriptorsExtractorBinary>();
 		SRef<features::IDescriptorMatcher> descriptorsMatcher = xpcfComponentManager->resolve<features::IDescriptorMatcher>();
 		SRef<features::IMatchesFilter> matchesFilter = xpcfComponentManager->resolve<features::IMatchesFilter>();
@@ -74,7 +72,7 @@ int main(int argc, char *argv[])
 		std::vector<DescriptorMatch> matches;
 		std::vector<DescriptorMatch> outMatches;
 
-#ifdef WEBCAM
+#if WEBCAM
 		int count = 0;
 		clock_t start, end;
 		start = clock();
@@ -98,13 +96,15 @@ int main(int argc, char *argv[])
 				// Init values on first frame
 				init = true;
 				previousImage = image;
-				descriptorsExtractor->compute(previousImage, previousKeylines, previousDescriptors);
+				keylineDetector->detect(previousImage, previousKeylines);
+				descriptorsExtractor->extract(previousImage, previousKeylines, previousDescriptors);
 				matchesOverlay->draw(image, previousImage, outImage, keylines, previousKeylines, matches);
 			}
 			else
 			{
 				// Feature extraction
-				descriptorsExtractor->compute(image, keylines, descriptors);
+				keylineDetector->detect(image, keylines);
+				descriptorsExtractor->extract(image, keylines, descriptors);
 				// Matching
 				descriptorsMatcher->match(descriptors, previousDescriptors, matches);
 				LOG_INFO("matches size: {}", matches.size());
@@ -142,8 +142,10 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 		// Line Features extraction
-		descriptorsExtractor->compute(image, keylines, descriptors);
-		descriptorsExtractor->compute(previousImage, previousKeylines, previousDescriptors);
+		keylineDetector->detect(image, keylines);
+		descriptorsExtractor->extract(image, keylines, descriptors);
+		keylineDetector->detect(previousImage, previousKeylines);
+		descriptorsExtractor->extract(previousImage, previousKeylines, previousDescriptors);
 		// Matching
 		descriptorsMatcher->match(descriptors, previousDescriptors, matches);
 		LOG_INFO("matches size: {}", matches.size());

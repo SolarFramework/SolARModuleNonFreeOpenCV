@@ -1,10 +1,12 @@
-QT       -= core gui
+## remove Qt dependencies
+QT     -= core gui
 CONFIG -= app_bundle qt
 
+## global definitions : target lib name, version
 TARGET = SolARBinaryDescriptorsMatcher
-VERSION=0.7.0
-DEFINES +=  $${TARGET}VERSION=\"$${VERSION}\"
+VERSION=0.9.2
 
+DEFINES += MYVERSION=$${VERSION}
 CONFIG += c++1z
 CONFIG += console
 
@@ -22,16 +24,16 @@ CONFIG(release,debug|release) {
     DEFINES += NDEBUG=1
 }
 
+DEPENDENCIESCONFIG = sharedlib install_recurse
 
-CONFIG += shared
-
-DEPENDENCIESCONFIG = sharedlib recursive install_recurse
+win32:CONFIG += static
+win32:CONFIG += shared
 
 ## Configuration for Visual Studio to install binaries and dependencies. Work also for QT Creator by replacing QMAKE_INSTALL
 PROJECTCONFIG = QTVS
 
-#NOTE : CONFIG as staticlib or sharedlib, DEPENDENCIESCONFIG as staticlib or sharedlib and PROJECTDEPLOYDIR MUST BE DEFINED BEFORE templatelibbundle.pri inclusion
-include ($${QMAKE_REMAKEN_RULES_ROOT}/templateappconfig.pri)
+#NOTE : CONFIG as staticlib or sharedlib, DEPENDENCIESCONFIG as staticlib or sharedlib, QMAKE_TARGET.arch and PROJECTDEPLOYDIR MUST BE DEFINED BEFORE templatelibconfig.pri inclusion
+include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/templateappconfig.pri)))  # Shell_quote & shell_path required for visual on windows
 
 #DEFINES += BOOST_ALL_NO_LIB
 DEFINES += BOOST_ALL_DYN_LINK
@@ -55,22 +57,17 @@ win32 {
     QMAKE_LFLAGS += /MACHINE:X64
     DEFINES += WIN64 UNICODE _UNICODE
     QMAKE_COMPILER_DEFINES += _WIN64
-    QMAKE_CXXFLAGS += -wd4250 -wd4251 -wd4244 -wd4275
 
     # Windows Kit (msvc2013 64)
     LIBS += -L$$(WINDOWSSDKDIR)lib/winv6.3/um/x64 -lshell32 -lgdi32 -lComdlg32
     INCLUDEPATH += $$(WINDOWSSDKDIR)lib/winv6.3/um/x64
- }
-
-INCLUDEPATH += $${PWD}
-
-DISTFILES +=     Makefile
-
-OTHER_FILES +=     packagedependencies.txt
+}
 
 configfile.path = $${TARGETDEPLOYDIR}/
 configfile.files = $${PWD}/SolARBinaryDescriptorsMatcher_config.xml
 INSTALLS += configfile
 
+DISTFILES += packagedependencies.txt
+
 #NOTE : Must be placed at the end of the .pro
-include ($${QMAKE_REMAKEN_RULES_ROOT}/remaken_install_target.pri)
+include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows

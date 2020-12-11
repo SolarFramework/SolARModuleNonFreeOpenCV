@@ -104,7 +104,7 @@ void SolARDescriptorsExtractorBinaryOpencv::compute(const SRef<Image> image, std
 
 	cv::Mat cvDescriptors;
 	std::vector<cv::line_descriptor::KeyLine> cvKeylines;
-	// Keyline detection
+	// Keyline detection // TODO allow custom IKeylineDetector injection here
 	if (m_type == "LSD")
 		m_detector->detect(img_1, cvKeylines, m_scale, m_numOctave);
 	else

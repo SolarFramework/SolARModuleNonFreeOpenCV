@@ -58,7 +58,7 @@ public:
 				 const std::vector<Keyline> & keylines,
 				 SRef<DescriptorBuffer> & descriptors) override;
 
-	/// @brief Detects keyliens and extracts the corresponding descriptors
+	/// @brief Detects keylines and extracts the corresponding descriptors
 	/// @param[in] image The image on which the keylines have been detected
 	/// @param[out] keylines The set of detected keylines on which the descriptors are extracted
 	/// @param[out] descriptors The extracted descriptors. The nth descriptor corresponds to the nth keyline of the second argument.
