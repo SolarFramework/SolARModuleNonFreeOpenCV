@@ -112,7 +112,7 @@ FrameworkReturnCode SolARNonFreeOpenCVHelper::convertCVMatToSolar(const cv::Mat&
     if (openCVMat.cols != Cols || openCVMat.rows != Rows || openCVMat.type() != inferOpenCVType<T>()) {
         return FrameworkReturnCode::_ERROR_;
     }
-    Matrix<T, Rows , Cols > mat(reinterpret_cast<T*>( openCVMat.data));
+    datastructure::Matrix<T, Rows , Cols > mat(reinterpret_cast<T*>( openCVMat.data));
     solarMat = mat;
 
     return FrameworkReturnCode::_SUCCESS;
@@ -124,7 +124,7 @@ FrameworkReturnCode SolARNonFreeOpenCVHelper::convertCVMatToSolar(const cv::Mat&
     if (openCVMat.cols != solarTransform.cols() || openCVMat.rows != solarTransform.rows()+1 || openCVMat.type() != inferOpenCVType<T>()) {
         return FrameworkReturnCode::_ERROR_;
     }
-    Matrix<T, Dim+1 , Dim+1 > transform(reinterpret_cast<T*>( openCVMat.data));
+    datastructure::Matrix<T, Dim+1 , Dim+1 > transform(reinterpret_cast<T*>( openCVMat.data));
     solarTransform = transform;
 
     return FrameworkReturnCode::_SUCCESS;
