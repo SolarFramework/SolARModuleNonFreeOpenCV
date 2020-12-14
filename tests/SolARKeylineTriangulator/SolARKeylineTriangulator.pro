@@ -1,6 +1,6 @@
 # remove Qt dependencies
 QT     -= core gui
-CONFIG -= app_bundle qt
+CONFIG -= qt
 
 ## global definitions : target lib name, version
 TARGET = SolARKeylineTriangulator

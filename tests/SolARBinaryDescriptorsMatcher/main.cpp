@@ -25,7 +25,7 @@ using namespace SolAR::api;
 /**
  * Declare module.
  */
-int main(int argc, char *argv[])
+int main()
 {
 #if NDEBUG
     boost::log::core::get()->set_logging_enabled(false);
@@ -48,17 +48,17 @@ int main(int argc, char *argv[])
         LOG_INFO("Start creating components");
 
 #if WEBCAM
-		SRef<input::devices::ICamera> camera = xpcfComponentManager->resolve<input::devices::ICamera>();
-#else // !WEBCAM
-		SRef<image::IImageLoader> imageLoader1 = xpcfComponentManager->resolve<image::IImageLoader>("image1");
-		SRef<image::IImageLoader> imageLoader2 = xpcfComponentManager->resolve<image::IImageLoader>("image1");
-#endif // WEBCAM
-		SRef<features::IKeylineDetector> keylineDetector = xpcfComponentManager->resolve<features::IKeylineDetector>();
-		SRef<features::IDescriptorsExtractorBinary> descriptorsExtractor = xpcfComponentManager->resolve<features::IDescriptorsExtractorBinary>();
-		SRef<features::IDescriptorMatcher> descriptorsMatcher = xpcfComponentManager->resolve<features::IDescriptorMatcher>();
-		SRef<features::IMatchesFilter> matchesFilter = xpcfComponentManager->resolve<features::IMatchesFilter>();
-		SRef<display::IMatchesOverlay> matchesOverlay = xpcfComponentManager->resolve<display::IMatchesOverlay>();
-		SRef<display::IImageViewer> viewer = xpcfComponentManager->resolve<display::IImageViewer>();
+		auto camera = xpcfComponentManager->resolve<input::devices::ICamera>();
+#else
+		auto imageLoader1 = xpcfComponentManager->resolve<image::IImageLoader>("image1");
+		auto imageLoader2 = xpcfComponentManager->resolve<image::IImageLoader>("image1");
+#endif
+		auto keylineDetector = xpcfComponentManager->resolve<features::IKeylineDetector>();
+		auto descriptorsExtractor = xpcfComponentManager->resolve<features::IDescriptorsExtractorBinary>();
+		auto descriptorsMatcher = xpcfComponentManager->resolve<features::IDescriptorMatcher>();
+		auto matchesFilter = xpcfComponentManager->resolve<features::IMatchesFilter>();
+		auto matchesOverlay = xpcfComponentManager->resolve<display::IMatchesOverlay>();
+		auto viewer = xpcfComponentManager->resolve<display::IImageViewer>();
 
         LOG_DEBUG("Components created!");
 
@@ -107,10 +107,10 @@ int main(int argc, char *argv[])
 				descriptorsExtractor->extract(image, keylines, descriptors);
 				// Matching
 				descriptorsMatcher->match(descriptors, previousDescriptors, matches);
-				LOG_INFO("matches size: {}", matches.size());
+				LOG_DEBUG("matches size: {}", matches.size());
 				// Filter out obvious outliers
 				matchesFilter->filter(matches, outMatches, keylines, previousKeylines);
-				LOG_INFO("outMatches size: {}", outMatches.size());
+				LOG_DEBUG("outMatches size: {}", outMatches.size());
 				// Draw line correspondances
 				matchesOverlay->draw(image, previousImage, outImage, keylines, previousKeylines, outMatches);
 				// Push current data to previous data
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 		double duration = double(end - start) / CLOCKS_PER_SEC;
 		printf("\n\nElasped time is %.2lf seconds.\n", duration);
 		printf("Number of processed frames per second : %8.2f\n\n", count / duration);
-#else // !WEBCAM //
+#else // !WEBCAM
 		// Load images
 		if (imageLoader1->getImage(image) !=  FrameworkReturnCode::_SUCCESS)
 		{
@@ -148,10 +148,10 @@ int main(int argc, char *argv[])
 		descriptorsExtractor->extract(previousImage, previousKeylines, previousDescriptors);
 		// Matching
 		descriptorsMatcher->match(descriptors, previousDescriptors, matches);
-		LOG_INFO("matches size: {}", matches.size());
+		LOG_DEBUG("matches size: {}", matches.size());
 		// Filter out obvious outliers
 		matchesFilter->filter(matches, outMatches, keylines, previousKeylines);
-		LOG_INFO("outMatches size: {}", outMatches.size());
+		LOG_DEBUG("outMatches size: {}", outMatches.size());
 		// Draw line correspondances
 		matchesOverlay->draw(image, previousImage, outImage, keylines, previousKeylines, outMatches);
         // Display the image with matches in a viewer. If escape key is pressed, exit the loop.

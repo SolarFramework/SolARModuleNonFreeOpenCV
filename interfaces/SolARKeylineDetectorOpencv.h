@@ -22,14 +22,10 @@
 #include "xpcf/component/ConfigurableBase.h"
 #include "SolAROpencvNonFreeAPI.h"
 
-// Line Segment Detector (FIXME: seem unaccessible in OpenCV 4+)
 #include <opencv2/line_descriptor.hpp>
-// Fast Line Detector
 #include <opencv2/ximgproc.hpp>
 
 namespace SolAR {
-using namespace datastructure;
-using namespace api::features;
 namespace MODULES {
 namespace NONFREEOPENCV {
 
@@ -40,35 +36,40 @@ namespace NONFREEOPENCV {
 *
 */
 
-class SOLAROPENCVNONFREE_EXPORT_API SolARKeylineDetectorOpencv : public org::bcom::xpcf::ConfigurableBase,
-	public IKeylineDetector
-{
-public:
-	SolARKeylineDetectorOpencv();
-	~SolARKeylineDetectorOpencv() override;
-	void unloadComponent() override final;
+	class SOLAROPENCVNONFREE_EXPORT_API SolARKeylineDetectorOpencv : public org::bcom::xpcf::ConfigurableBase,
+		public api::features::IKeylineDetector
+	{
+	public:
+		SolARKeylineDetectorOpencv();
+		~SolARKeylineDetectorOpencv() override;
+		void unloadComponent() override final;
 
-	org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
+		org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
 
-	void setType(KeylineDetectorType type) override;
+		void setType(api::features::KeylineDetectorType type) override;
 
-	KeylineDetectorType getType() override;
+		api::features::KeylineDetectorType getType() override;
 
-	void detect(const SRef<Image> image, std::vector<Keyline> & keylines) override;
+		org::bcom::xpcf::XPCFErrorCode initDetector() override;
 
-private:
-	std::vector<cv::Mat> computeGaussianPyramid(const cv::Mat & opencvImage, int numOctaves, int scale);
+		void detect(const SRef<datastructure::Image> image, std::vector<datastructure::Keyline> & keylines) override;
 
-	cv::line_descriptor::KeyLine createCvKeyline(const cv::Vec4f & line);
-	Keyline createKeyline(const cv::line_descriptor::KeyLine & cvKeyline);
+	private:
+		// Computes different scale of the input image using gaussian blur and downscaling
+		std::vector<cv::Mat> computeGaussianPyramid(const cv::Mat & opencvImage, int numOctaves, int scale);
 
-	cv::Ptr<cv::Algorithm> m_detector;
-
-	std::string m_type = "FLD";
-	float m_imageRatio = 1.0f;
-	int m_scale = 2;
-	int m_numOctaves = 1;
-	int m_minLineLength = 0;
+		// Pointer to the detector instance
+		cv::Ptr<cv::Algorithm> m_detector;
+		// The type of the selected detector type in string form
+		std::string m_type{ "FLD" };
+		// Specify a downscaling factor for the input image of the detector
+		float m_imageRatio{ 1.0f };
+		// Image size reduction factor between octaves
+		int m_scale{ 2 };
+		// Number of image octaves computed to detect keylines at multiple scales
+		int m_numOctaves{ 1 };
+		// Keep only keylines that have a pixel length above this threshold
+		int m_minLineLength{ 0 };
 };
 }
 }

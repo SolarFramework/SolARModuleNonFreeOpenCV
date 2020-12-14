@@ -22,7 +22,7 @@ using namespace SolAR::api;
 /**
  * Declare module.
  */
-int main(int argc, char *argv[])
+int main()
 {
 #if NDEBUG
     boost::log::core::get()->set_logging_enabled(false);
@@ -44,11 +44,14 @@ int main(int argc, char *argv[])
 		// declare and create components
         LOG_INFO("Start creating components");
 
-		SRef<input::devices::ICamera> camera = xpcfComponentManager->resolve<input::devices::ICamera>();
-		SRef<image::IImageLoader> imageLoader = xpcfComponentManager->resolve<image::IImageLoader>();
-		SRef<features::IKeylineDetector> keylineDetector = xpcfComponentManager->resolve<features::IKeylineDetector>();
-		SRef<display::I2DOverlay> overlay = xpcfComponentManager->resolve<display::I2DOverlay>();
-		SRef<display::IImageViewer> viewer = xpcfComponentManager->resolve<display::IImageViewer>();
+#if WEBCAM
+		auto camera = xpcfComponentManager->resolve<input::devices::ICamera>();
+#else
+		auto imageLoader = xpcfComponentManager->resolve<image::IImageLoader>();
+#endif
+		auto keylineDetector = xpcfComponentManager->resolve<features::IKeylineDetector>();
+		auto overlay = xpcfComponentManager->resolve<display::I2DOverlay>();
+		auto viewer = xpcfComponentManager->resolve<display::IImageViewer>();
 
         LOG_DEBUG("Components created!");
 
