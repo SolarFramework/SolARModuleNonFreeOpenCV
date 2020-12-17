@@ -3,7 +3,7 @@ QT       -= core gui
 CONFIG -= qt
 
 ## global defintions : target lib name, version
-TARGET = SolARNonFreeOpenCVDescriptorExtractor
+TARGET = SolARTest_ModuleNonFreeOpenCV_DescriptorExtractor
 VERSION=0.9.0
 
 DEFINES += MYVERSION=$${VERSION}
@@ -64,7 +64,7 @@ win32 {
 }
 
 configfile.path = $${TARGETDEPLOYDIR}/
-configfile.files = $${PWD}/SolAROpenCVNonFreeDescriptorExtractor_conf.xml
+configfile.files = $${PWD}/SolARTest_ModuleNonFreeOpenCV_DescriptorExtractor_conf.xml
 INSTALLS += configfile
 
 DISTFILES += packagedependencies.txt
