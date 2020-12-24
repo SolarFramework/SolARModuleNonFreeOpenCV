@@ -40,6 +40,7 @@ using namespace cv::xfeatures2d;
 
 namespace SolAR {
 using namespace datastructure;
+using namespace api::features;
 namespace MODULES {
 namespace NONFREEOPENCV {
 

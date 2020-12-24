@@ -6,10 +6,6 @@
                 <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
                 <interface uuid="6FCDAA8D-6EA9-4C3F-97B0-46CD11B67A9B" name="IImageLoader" description="IImageLoader"/>
         </component>
-		<component uuid="e95302be-3fe1-44e0-97bf-a98380464af9" name="SolARSideBySideOverlayOpencv" description="SolARSideBySideOverlayOpencv">
-                <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
-                <interface uuid="a801354a-3e00-467c-b390-48c76fa8c53a" name="ISideBySideOverlay" description="ISideBySideOverlay"/>
-        </component>
 		<component uuid="cc51d685-9797-4ffd-a9dd-cec4f367fa6a" name="SolAR2DOverlayOpencv" description="SolAR2DOverlayOpencv">
                 <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
                 <interface uuid="62b8b0b5-9344-40e6-a288-e609eb3ff0f1" name="I2DOverlay" description="I2DOverlay"/>
@@ -32,7 +28,7 @@
 	
     <properties>
         <configure component="SolARImageLoaderOpencv">
-            <property name="filePath" type="string" value="../data/graf1.png"/>
+            <property name="filePath" type="string" value="../../data/graf1.png"/>
         </configure>
         <configure component="SolARKeypointDetectorNonFreeOpencv">
             <property name="type" type="string" value="SURF"/>
