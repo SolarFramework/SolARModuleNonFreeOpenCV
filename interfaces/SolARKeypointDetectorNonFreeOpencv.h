@@ -35,6 +35,18 @@ namespace NONFREEOPENCV {
   * @brief <B>Detects keypoints in an image (based on SIFT or SURF algorithm).</B>
   * <TT>UUID: d1f9317c-9519-4671-8ff5-4629773544f2</TT>
   *
+  * @SolARComponentPropertiesBegin
+  * @SolARComponentProperty{ imageRatio,
+  *                          resize image to speedup computation,
+  *                          @SolARComponentPropertyDescNum{ float, [0..MAX FLOAT], 1.f }}
+  * @SolARComponentProperty{ nbDescriptors,
+  *                          number of best features to select,
+  *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 1000 }}
+  * @SolARComponentProperty{ type,
+  *                          feature type (values among ["SURF"]),
+  *                          @SolARComponentPropertyDescString{ "SURF" }}
+  * @SolARComponentPropertiesEnd
+  *
   */
 
 class SOLAROPENCVNONFREE_EXPORT_API SolARKeypointDetectorNonFreeOpencv : public org::bcom::xpcf::ConfigurableBase,
