@@ -49,6 +49,16 @@ public:
 
 	org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
 	void unloadComponent() override final;
+
+    /// @brief Set keyline detector component.
+    /// @param[in] a keyline detector instance
+    /// @return FrameworkReturnCode::_SUCCESS if successful, else FrameworkReturnCode::_ERROR
+    FrameworkReturnCode setDetector(const SRef<api::features::IKeylineDetector> detector) override;
+
+    /// @brief Get keyline detector component.
+    /// @param[in] a keyline detector instance
+    /// @return FrameworkReturnCode::_SUCCESS if successful, else FrameworkReturnCode::_ERROR
+    FrameworkReturnCode getDetector(SRef<api::features::IKeylineDetector> & detector) const override;
 	
 	/// @brief Extracts the descriptors for a set of keylines
 	/// @param[in] image The image on which the keylines have been detected
@@ -67,15 +77,13 @@ public:
 				 SRef<DescriptorBuffer> & descriptors) override;
 
 private:
-	cv::Ptr<cv::line_descriptor::LSDDetector> m_detector;
+	SRef<api::features::IKeylineDetector> m_detector;
+
 	cv::Ptr<cv::line_descriptor::BinaryDescriptor> m_extractor;
 
-	std::string m_type = "BINARY";
-	float m_imageRatio = 1.0;
-	int m_scale = 2;
-	int m_numOctave = 1;
-	int m_widthOfBand = 7;
-	int m_minLineLength = 0;
+	float m_imageRatio{ 1.f };
+	int m_reductionRatio{ 2 };
+	int m_widthOfBand{ 7 };
 };
 }
 }

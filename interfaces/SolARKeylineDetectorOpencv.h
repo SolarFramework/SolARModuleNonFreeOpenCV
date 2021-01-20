@@ -23,7 +23,6 @@
 #include "SolAROpencvNonFreeAPI.h"
 
 #include <opencv2/line_descriptor.hpp>
-#include <opencv2/ximgproc.hpp>
 
 namespace SolAR {
 namespace MODULES {
@@ -56,16 +55,19 @@ namespace NONFREEOPENCV {
 
 	private:
 		// Computes different scale of the input image using gaussian blur and downscaling
-		std::vector<cv::Mat> computeGaussianPyramid(const cv::Mat & opencvImage, int numOctaves, int scale);
+		std::vector<cv::Mat> computeGaussianPyramids(const cv::Mat & opencvImage, int numOctaves, int scale);
+
+		// Convert a vector of cv::line_descriptor::KeyLine into a vector of SolAR Keyline
+		std::vector<datastructure::Keyline> toSolARKeylines(const std::vector<cv::line_descriptor::KeyLine> & cvKeylines);
 
 		// Pointer to the detector instance
 		cv::Ptr<cv::Algorithm> m_detector;
 		// The type of the selected detector type in string form
 		std::string m_type{ "FLD" };
 		// Specify a downscaling factor for the input image of the detector
-		float m_imageRatio{ 1.0f };
+		float m_imageRatio{ 1.f };
 		// Image size reduction factor between octaves
-		int m_scale{ 2 };
+		int m_reductionRatio{ 2 };
 		// Number of image octaves computed to detect keylines at multiple scales
 		int m_numOctaves{ 1 };
 		// Keep only keylines that have a pixel length above this threshold

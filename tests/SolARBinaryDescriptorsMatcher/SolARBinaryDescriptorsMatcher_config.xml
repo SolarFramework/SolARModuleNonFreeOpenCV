@@ -60,15 +60,13 @@
         <configure component="SolARKeylineDetectorOpencv"> <!-- SolARKeylineDetectorOpencv -->
             <property name="type" type="string" value="FLD"/>
             <property name="imageRatio" type="Float" value="1"/>
-            <property name="scale" type="Integer" value="2"/>
+            <property name="reductionRatio" type="Integer" value="2"/>
             <property name="numOctaves" type="Integer" value="1"/>
             <property name="minLineLength" type="Integer" value="20"/>
         </configure>
         <configure component="SolARDescriptorsExtractorBinaryOpencv"> <!-- SolARDescriptorsExtractorBinaryOpencv -->
-            <property name="type" type="string" value="BINARY"/>
             <property name="imageRatio" type="Float" value="1.0"/>
-            <property name="scale" type="Integer" value="2"/>
-            <property name="numOctave" type="Integer" value="1"/>
+            <property name="reductionRatio" type="Integer" value="2"/>
             <property name="widthOfBand" type="Integer" value="7"/>
         </configure>
         <configure component="SolARDescriptorMatcherBinaryOpencv"> <!-- SolARDescriptorMatcherBinaryOpencv -->

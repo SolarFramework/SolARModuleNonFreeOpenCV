@@ -61,6 +61,8 @@ int main()
 		auto viewer = xpcfComponentManager->resolve<display::IImageViewer>();
 
         LOG_DEBUG("Components created!");
+		
+		descriptorsExtractor->setDetector(keylineDetector);
 
 		SRef<Image> image;
 		SRef<Image> previousImage;
@@ -72,10 +74,10 @@ int main()
 		std::vector<DescriptorMatch> matches;
 		std::vector<DescriptorMatch> outMatches;
 
-#if WEBCAM
 		int count = 0;
 		clock_t start, end;
 		start = clock();
+#if WEBCAM
 		// Init camera
 		if (camera->start() != FrameworkReturnCode::_SUCCESS)
 		{
@@ -96,15 +98,13 @@ int main()
 				// Init values on first frame
 				init = true;
 				previousImage = image;
-				keylineDetector->detect(previousImage, previousKeylines);
-				descriptorsExtractor->extract(previousImage, previousKeylines, previousDescriptors);
+				descriptorsExtractor->compute(previousImage, previousKeylines, previousDescriptors);
 				matchesOverlay->draw(image, previousImage, outImage, keylines, previousKeylines, matches);
 			}
 			else
 			{
 				// Feature extraction
-				keylineDetector->detect(image, keylines);
-				descriptorsExtractor->extract(image, keylines, descriptors);
+				descriptorsExtractor->compute(image, keylines, descriptors);
 				// Matching
 				descriptorsMatcher->match(descriptors, previousDescriptors, matches);
 				LOG_DEBUG("matches size: {}", matches.size());
@@ -125,10 +125,6 @@ int main()
 				break;
 			}
 		}
-		end = clock();
-		double duration = double(end - start) / CLOCKS_PER_SEC;
-		printf("\n\nElasped time is %.2lf seconds.\n", duration);
-		printf("Number of processed frames per second : %8.2f\n\n", count / duration);
 #else // !WEBCAM
 		// Load images
 		if (imageLoader1->getImage(image) !=  FrameworkReturnCode::_SUCCESS)
@@ -141,11 +137,10 @@ int main()
 			LOG_WARNING("Image 2 ({}) can't be loaded", imageLoader2->bindTo<xpcf::IConfigurable>()->getProperty("filePath")->getStringValue());
 			return 0;
 		}
+		count++;
 		// Line Features extraction
-		keylineDetector->detect(image, keylines);
-		descriptorsExtractor->extract(image, keylines, descriptors);
-		keylineDetector->detect(previousImage, previousKeylines);
-		descriptorsExtractor->extract(previousImage, previousKeylines, previousDescriptors);
+		descriptorsExtractor->compute(image, keylines, descriptors);
+		descriptorsExtractor->compute(previousImage, previousKeylines, previousDescriptors);
 		// Matching
 		descriptorsMatcher->match(descriptors, previousDescriptors, matches);
 		LOG_DEBUG("matches size: {}", matches.size());
@@ -160,6 +155,10 @@ int main()
 				break;
         LOG_INFO("End of SolARBinaryDescriptorsMatcher test");
 #endif
+		end = clock();
+		double duration = double(end - start) / CLOCKS_PER_SEC;
+		printf("\n\nElasped time is %.2lf seconds.\n", duration);
+		printf("Number of processed frames per second : %8.2f\n\n", count / duration);
 	}
 	catch (xpcf::Exception &e)
 	{
