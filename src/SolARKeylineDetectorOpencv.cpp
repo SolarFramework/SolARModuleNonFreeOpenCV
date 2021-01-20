@@ -25,6 +25,7 @@ using namespace cv::line_descriptor;
 using namespace cv::ximgproc;
 
 namespace SolAR {
+using namespace datastructure;
 namespace MODULES {
 namespace NONFREEOPENCV {
 

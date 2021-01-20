@@ -17,7 +17,7 @@ using namespace SolAR;
 using namespace SolAR::datastructure;
 using namespace SolAR::api;
 
-#define WEBCAM 1
+#define WEBCAM 0
 
 /**
  * Declare module.

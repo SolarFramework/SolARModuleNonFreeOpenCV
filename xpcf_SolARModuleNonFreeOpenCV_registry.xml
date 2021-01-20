@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <xpcf-registry>
-    <module uuid="2bce6a98-2ad7-4cd5-bd63-b3ee68fb59c0" name="SolARModuleNonFreeOpenCV" description="SolARModuleNonFreeOpenCV" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleNonFreeOpenCV/0.8.0/lib/x86_64/shared">
+    <module uuid="2bce6a98-2ad7-4cd5-bd63-b3ee68fb59c0" name="SolARModuleNonFreeOpenCV" description="SolARModuleNonFreeOpenCV" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleNonFreeOpenCV/0.9.2/lib/x86_64/shared">
         <component uuid="5b2a6059-e704-4196-aa6d-b7066243c308" name="SolARDescriptorMatcherBinaryOpencv" description="SolARDescriptorMatcherBinaryOpencv">
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="dda38a40-c50a-4e7d-8433-0f04c7c98518" name="IDescriptorMatcher" description="IDescriptorMatcher"/>
