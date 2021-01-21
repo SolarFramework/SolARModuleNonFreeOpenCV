@@ -1,9 +1,9 @@
-# remove Qt dependencies
+## remove Qt dependencies
 QT     -= core gui
 CONFIG -= qt
 
-## global definitions : target lib name, version
-TARGET = SolARKeylineTriangulator
+## global defintions : target lib name, version
+TARGET = SolARTest_ModuleNonFreeOpenCV_KeylineTriangulator
 VERSION=0.9.2
 
 DEFINES += MYVERSION=$${VERSION}
@@ -26,7 +26,7 @@ CONFIG(release,debug|release) {
 
 DEPENDENCIESCONFIG = sharedlib install_recurse
 
-win32:CONFIG += static
+win32:CONFIG -= static
 win32:CONFIG += shared
 
 ## Configuration for Visual Studio to install binaries and dependencies. Work also for QT Creator by replacing QMAKE_INSTALL
@@ -45,7 +45,7 @@ SOURCES += \
 
 unix {
     LIBS += -ldl
-    QMAKE_CXXFLAGS += -DBOOST_LOG_DYN_LINK
+    QMAKE_CXXFLAGS += -DBOOST_ALL_DYN_LINK
 }
 
 macx {
@@ -54,18 +54,22 @@ macx {
 }
 
 win32 {
+    QMAKE_LFLAGS += /MACHINE:X64
     DEFINES += WIN64 UNICODE _UNICODE
     QMAKE_COMPILER_DEFINES += _WIN64
     QMAKE_CXXFLAGS += -wd4250 -wd4251 -wd4244 -wd4275
-    QMAKE_CXXFLAGS_DEBUG += /Od
-    QMAKE_CXXFLAGS_RELEASE += /O2
- }
+
+    # Windows Kit (msvc2013 64)
+    LIBS += -L$$(WINDOWSSDKDIR)lib/winv6.3/um/x64 -lshell32 -lgdi32 -lComdlg32
+    INCLUDEPATH += $$(WINDOWSSDKDIR)lib/winv6.3/um/x64
+}
 
 configfile.path = $${TARGETDEPLOYDIR}/
-configfile.files = $${PWD}/SolARKeylineTriangulator_config.xml
+configfile.files = $${PWD}/SolARTest_ModuleNonFreeOpenCV_KeylineTriangulator_conf.xml
 INSTALLS += configfile
 
 DISTFILES += packagedependencies.txt
+
 
 #NOTE : Must be placed at the end of the .pro
 include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows
