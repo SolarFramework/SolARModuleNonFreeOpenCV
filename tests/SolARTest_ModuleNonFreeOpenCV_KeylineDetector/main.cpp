@@ -1,7 +1,6 @@
 
-#include <xpcf/xpcf.h>
-#include <boost/log/core.hpp>
-#include <core/Log.h>
+#include "xpcf/xpcf.h"
+#include "core/Log.h"
 
 #include "api/display/I2DOverlay.h"
 #include "api/display/IImageViewer.h"
@@ -9,9 +8,9 @@
 #include "api/image/IImageLoader.h"
 #include "api/input/devices/ICamera.h"
 
-#include "SolARNonFreeOpenCVHelper.h"
+#include <boost/log/core.hpp>
 
-namespace xpcf=org::bcom::xpcf;
+namespace xpcf = org::bcom::xpcf;
 
 using namespace SolAR;
 using namespace SolAR::datastructure;
@@ -35,9 +34,10 @@ int main()
 		/* this is needed in dynamic mode */
 		SRef<xpcf::IComponentManager> xpcfComponentManager = xpcf::getComponentManagerInstance();
 
-		if(xpcfComponentManager->load("SolARKeylineDetector_config.xml") != org::bcom::xpcf::_SUCCESS)
+		const char* configFile = "SolARTest_ModuleNonFreeOpenCV_KeylineDetector_conf.xml";
+		if(xpcfComponentManager->load(configFile) != org::bcom::xpcf::_SUCCESS)
 		{
-			LOG_ERROR("Failed to load the configuration file SolARKeylineDetector_config.xml");
+			LOG_ERROR("Failed to load the configuration file {}", configFile);
 			return -1;
 		}
 
@@ -56,7 +56,6 @@ int main()
         LOG_DEBUG("Components created!");
 
 		SRef<Image> image;
-		cv::Mat opencvImage;
 		std::vector<Keyline> keylines;
 
 		int count = 0;

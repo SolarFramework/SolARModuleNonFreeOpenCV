@@ -1,9 +1,9 @@
 ## remove Qt dependencies
 QT     -= core gui
-CONFIG -= qt
+CONFIG -= app_bundle qt
 
 ## global definitions : target lib name, version
-TARGET = SolARKeylineDetector
+TARGET = SolARTest_ModuleNonFreeOpenCV_BinaryDescriptorsMatcher
 VERSION=0.9.2
 
 DEFINES += MYVERSION=$${VERSION}
@@ -54,15 +54,18 @@ macx {
 }
 
 win32 {
+    QMAKE_LFLAGS += /MACHINE:X64
     DEFINES += WIN64 UNICODE _UNICODE
     QMAKE_COMPILER_DEFINES += _WIN64
     QMAKE_CXXFLAGS += -wd4250 -wd4251 -wd4244 -wd4275
-    QMAKE_CXXFLAGS_DEBUG += /Od
-    QMAKE_CXXFLAGS_RELEASE += /O2
+
+    # Windows Kit (msvc2013 64)
+    LIBS += -L$$(WINDOWSSDKDIR)lib/winv6.3/um/x64 -lshell32 -lgdi32 -lComdlg32
+    INCLUDEPATH += $$(WINDOWSSDKDIR)lib/winv6.3/um/x64
 }
 
 configfile.path = $${TARGETDEPLOYDIR}/
-configfile.files = $${PWD}/SolARKeylineDetector_config.xml
+configfile.files = $${PWD}/SolARTest_ModuleNonFreeOpenCV_BinaryDescriptorsMatcher_conf.xml
 INSTALLS += configfile
 
 DISTFILES += packagedependencies.txt

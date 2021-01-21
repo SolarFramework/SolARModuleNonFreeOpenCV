@@ -1,7 +1,6 @@
 
-#include <xpcf/xpcf.h>
-#include <boost/log/core.hpp>
-#include <core/Log.h>
+#include "xpcf/xpcf.h"
+#include "core/Log.h"
 
 #include "api/display/IImageViewer.h"
 #include "api/display/IMatchesOverlay.h"
@@ -12,9 +11,9 @@
 #include "api/image/IImageLoader.h"
 #include "api/input/devices/ICamera.h"
 
-#include "SolARNonFreeOpenCVHelper.h"
+#include <boost/log/core.hpp>
 
-namespace xpcf=org::bcom::xpcf;
+namespace xpcf = org::bcom::xpcf;
 
 using namespace SolAR;
 using namespace SolAR::datastructure;
@@ -38,9 +37,10 @@ int main()
 		/* this is needed in dynamic mode */
 		SRef<xpcf::IComponentManager> xpcfComponentManager = xpcf::getComponentManagerInstance();
 
-		if(xpcfComponentManager->load("SolARBinaryDescriptorsMatcher_config.xml") != org::bcom::xpcf::_SUCCESS)
+		const char* configFile = "SolARTest_ModuleNonFreeOpenCV_BinaryDescriptorsMatcher_conf.xml";
+		if(xpcfComponentManager->load(configFile) != org::bcom::xpcf::_SUCCESS)
 		{
-			LOG_ERROR("Failed to load the configuration file SolARBinaryDescriptorsMatcher_config.xml");
+			LOG_ERROR("Failed to load the configuration file {}", configFile);
 			return -1;
 		}
 
@@ -121,7 +121,7 @@ int main()
 			// Display the image with matches in a viewer. If escape key is pressed, exit the loop.
 			if (viewer->display(outImage) == FrameworkReturnCode::_STOP)
 			{
-				LOG_INFO("End of SolARBinaryDescriptorsMatcher test");
+				LOG_INFO("End of SolARTest_ModuleNonFreeOpenCV_BinaryDescriptorsMatcher test");
 				break;
 			}
 		}
@@ -153,7 +153,7 @@ int main()
 		while (true)
 			if (viewer->display(outImage) == FrameworkReturnCode::_STOP)
 				break;
-        LOG_INFO("End of SolARBinaryDescriptorsMatcher test");
+        LOG_INFO("End of SolARTest_ModuleNonFreeOpenCV_BinaryDescriptorsMatcher test");
 #endif
 		end = clock();
 		double duration = double(end - start) / CLOCKS_PER_SEC;

@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
 		/* Instantiate component manager */
 		SRef<xpcf::IComponentManager> xpcfComponentManager = xpcf::getComponentManagerInstance();
 
-		std::string configFile = "SolARTest_ModuleNonFreeOpenCV_KeylineTriangulator_conf.xml";
-		if (xpcfComponentManager->load("SolARTest_ModuleNonFreeOpenCV_KeylineTriangulator_conf.xml") != org::bcom::xpcf::_SUCCESS)
+		const char* configFile = "SolARTest_ModuleNonFreeOpenCV_KeylineTriangulator_conf.xml";
+		if (xpcfComponentManager->load(configFile) != org::bcom::xpcf::_SUCCESS)
 		{
 			LOG_ERROR("Failed to load the configuration file {}", configFile);
 			return -1;
