@@ -59,6 +59,9 @@ int main()
 		cv::Mat opencvImage;
 		std::vector<Keyline> keylines;
 
+		int count = 0;
+		clock_t start, end;
+		start = clock();
 #if WEBCAM
 		// Init camera
 		if (camera->start() != FrameworkReturnCode::_SUCCESS)
@@ -66,9 +69,6 @@ int main()
 			LOG_ERROR("Camera cannot start");
 			return -1;
 		}
-		int count = 0;
-		clock_t start, end;
-		start = clock();
 		// Main loop, press escape key to exit
 		while (true)
 		{
@@ -87,16 +87,13 @@ int main()
 				break;
 			}
 		}
-		end = clock();
-		double duration = double(end - start) / CLOCKS_PER_SEC;
-		printf("\n\nElasped time is %.2lf seconds.\n", duration);
-		printf("Number of processed frames per second : %8.2f\n\n", count / duration);
 #else
 		if (imageLoader->getImage(image) !=  FrameworkReturnCode::_SUCCESS)
 		{
 			LOG_WARNING("Image ({}) can't be loaded", imageLoader->bindTo<xpcf::IConfigurable>()->getProperty("filePath")->getStringValue());
 			return 0;
 		}
+		count++;
 		// Detect keylines in image
 		keylineDetector->detect(image, keylines);
 		LOG_INFO("Detected {} lines.", keylines.size());
@@ -108,6 +105,10 @@ int main()
                 break;
         LOG_INFO("End of SolARKeylineDetector test");
 #endif
+		end = clock();
+		double duration = double(end - start) / CLOCKS_PER_SEC;
+		printf("\n\nElasped time is %.2lf seconds.\n", duration);
+		printf("Number of processed frames per second : %8.2f\n\n", count / duration);
 	}
 	catch (xpcf::Exception &e)
 	{

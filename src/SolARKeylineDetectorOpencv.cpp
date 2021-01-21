@@ -129,7 +129,7 @@ void SolARKeylineDetectorOpencv::detect(const SRef<datastructure::Image> image, 
 			// Prepare different scale/octave
 			std::vector<std::vector<cv::Vec4f>> lines;
 			lines.resize(m_numOctaves);
-			std::vector<cv::Mat> gaussianPyrs = computeGaussianPyramids(opencvImage, m_numOctaves, m_scale);
+			std::vector<cv::Mat> gaussianPyrs = computeGaussianPyramids(opencvImage, m_numOctaves, m_reductionRatio);
 			// Perform line detection on each octave
 			int lineCount{0};
 			for (int i = 0; i < m_numOctaves; ++i)
@@ -194,7 +194,7 @@ void SolARKeylineDetectorOpencv::detect(const SRef<datastructure::Image> image, 
 				}
 				// Prepare next octave scale factor
 				if (i < m_numOctaves - 1)
-					octaveScale *= m_scale;
+					octaveScale *= m_reductionRatio;
 			}
 			break;
 		}
@@ -204,7 +204,7 @@ void SolARKeylineDetectorOpencv::detect(const SRef<datastructure::Image> image, 
 			std::vector<cv::line_descriptor::KeyLine> cvKeylines;
 			// Perform keyline detection
 			m_detector.dynamicCast<cv::line_descriptor::LSDDetector>()
-				->detect(opencvImage, cvKeylines, m_scale, m_numOctaves, cv::Mat());
+				->detect(opencvImage, cvKeylines, m_reductionRatio, m_numOctaves, cv::Mat());
 			// Convert to SolAR Keylines
 			keylines = toSolARKeylines(cvKeylines);
 			break;

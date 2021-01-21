@@ -85,27 +85,23 @@ IDescriptorMatcher::RetCode SolARDescriptorMatcherBinaryOpencv::match(const SRef
 	m_matcher->knnMatch(cvDescriptors1, cvDescriptors2, cvMatches, m_numClosestDescriptors, cv::Mat(), true);
 
 	// Keep only best matches
-	unsigned idx;
 	for (const auto& match : cvMatches)
 	{
-		idx = getBestMatchIndex(match);
-		if (idx >= 0)
-			matches.push_back(DescriptorMatch(match[idx].queryIdx, match[idx].trainIdx, match[idx].distance));
+		cv::DMatch best;
+		if (getBestMatch(match, best))
+			matches.push_back(DescriptorMatch(best.queryIdx, best.trainIdx, best.distance));
 	}
 
 	return IDescriptorMatcher::RetCode::DESCRIPTORS_MATCHER_OK;
 }
 
-unsigned SolARDescriptorMatcherBinaryOpencv::getBestMatchIndex(const std::vector<cv::DMatch> & candidates)
+bool SolARDescriptorMatcherBinaryOpencv::getBestMatch(const std::vector<cv::DMatch> & candidates, cv::DMatch & bestMatch)
 {
 	if (candidates.empty())
-		return -1;
+		return false;
 
-	unsigned minIdx = 0;
-	for (unsigned i = 1; i < candidates.size(); i++)
-		if (candidates[i] < candidates[minIdx])
-			minIdx = i;
-	return minIdx;
+	bestMatch = *std::min_element(candidates.begin(), candidates.end());
+	return true;
 }
 
 }

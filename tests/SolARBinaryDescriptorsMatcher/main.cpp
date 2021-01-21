@@ -143,10 +143,10 @@ int main()
 		descriptorsExtractor->compute(previousImage, previousKeylines, previousDescriptors);
 		// Matching
 		descriptorsMatcher->match(descriptors, previousDescriptors, matches);
-		LOG_DEBUG("matches size: {}", matches.size());
+		LOG_INFO("matches size: {}", matches.size());
 		// Filter out obvious outliers
 		matchesFilter->filter(matches, outMatches, keylines, previousKeylines);
-		LOG_DEBUG("outMatches size: {}", outMatches.size());
+		LOG_INFO("outMatches size: {}", outMatches.size());
 		// Draw line correspondances
 		matchesOverlay->draw(image, previousImage, outImage, keylines, previousKeylines, outMatches);
         // Display the image with matches in a viewer. If escape key is pressed, exit the loop.

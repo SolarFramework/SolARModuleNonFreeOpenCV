@@ -73,7 +73,7 @@ public:
 	{ return RetCode::DESCRIPTORS_MATCHER_OK; };
 
 private:
-	unsigned getBestMatchIndex(const std::vector<cv::DMatch> & candidates);
+	bool getBestMatch(const std::vector<cv::DMatch> & candidates, cv::DMatch & bestMatch);
 
 	cv::Ptr<cv::line_descriptor::BinaryDescriptorMatcher> m_matcher;
 
