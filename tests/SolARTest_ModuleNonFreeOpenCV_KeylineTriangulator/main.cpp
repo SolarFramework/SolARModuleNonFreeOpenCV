@@ -43,8 +43,6 @@
 #include "api/solver/map/ITriangulator.h"
 #include "api/solver/pose/I3DTransformFinderFrom2D3D.h"
 
-#include "SolAROpenCVHelper.h"
-
 #include <boost/log/core.hpp>
 
 using namespace SolAR;

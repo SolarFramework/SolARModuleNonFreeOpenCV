@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "SolARKeylineDetectorOpencv.h"
+#include "SolARKeylineDetectorNonFreeOpencv.h"
 #include "SolARNonFreeOpenCVHelper.h"
 #include "core/Log.h"
 
 #include <opencv2/ximgproc.hpp>
 
-XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARKeylineDetectorOpencv)
+XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARKeylineDetectorNonFreeOpencv)
 
 namespace xpcf = org::bcom::xpcf;
 
@@ -39,7 +39,7 @@ static std::map<api::features::KeylineDetectorType, std::string> typeToString = 
 	{ api::features::KeylineDetectorType::LSD, "LSD" },
 };
 
-SolARKeylineDetectorOpencv::SolARKeylineDetectorOpencv() : ConfigurableBase(xpcf::toUUID<SolARKeylineDetectorOpencv>())
+SolARKeylineDetectorNonFreeOpencv::SolARKeylineDetectorNonFreeOpencv() : ConfigurableBase(xpcf::toUUID<SolARKeylineDetectorNonFreeOpencv>())
 {
 	declareInterface<api::features::IKeylineDetector>(this);
 
@@ -48,49 +48,57 @@ SolARKeylineDetectorOpencv::SolARKeylineDetectorOpencv() : ConfigurableBase(xpcf
 	declareProperty("numOctaves", m_numOctaves);
 	declareProperty("type", m_type);
 	declareProperty("minLineLength", m_minLineLength);
-	LOG_DEBUG("SolARKeylineDetectorOpencv constructor");
+	LOG_DEBUG("SolARKeylineDetectorNonFreeOpencv constructor");
 }
 
-SolARKeylineDetectorOpencv::~SolARKeylineDetectorOpencv()
+SolARKeylineDetectorNonFreeOpencv::~SolARKeylineDetectorNonFreeOpencv()
 {
-	LOG_DEBUG("SolARKeylineDetectorOpencv destructor");
+	LOG_DEBUG("SolARKeylineDetectorNonFreeOpencv destructor");
 }
 
-xpcf::XPCFErrorCode SolARKeylineDetectorOpencv::onConfigured()
+xpcf::XPCFErrorCode SolARKeylineDetectorNonFreeOpencv::onConfigured()
 {
-	LOG_DEBUG("SolARKeylineDetectorOpencv onConfigured");
+	LOG_DEBUG("SolARKeylineDetectorNonFreeOpencv onConfigured");
 	if (stringToType.find(m_type) != stringToType.end())
 	{
-		setType(stringToType.at(m_type));
 		return initDetector();
 	}
 	else
 	{
-		LOG_WARNING("Keyline detector of type {} defined in your configuration file does not exist", m_type);
-		return xpcf::_ERROR_NOT_IMPLEMENTED;
+		LOG_WARNING("Keyline detector of type {} defined in your configuration file is not supported", m_type);
+		return xpcf::_ERROR_TYPE;
 	}
 }
 
-void SolARKeylineDetectorOpencv::setType(api::features::KeylineDetectorType type)
+xpcf::XPCFErrorCode SolARKeylineDetectorNonFreeOpencv::setType(api::features::KeylineDetectorType type)
 {
-	m_type = typeToString.at(type);
+	if (typeToString.find(type) != typeToString.end())
+	{
+		m_type = typeToString.at(type);
+		return initDetector();
+	}
+	else
+	{
+		LOG_WARNING("Unsupported KeylineDetectorType: falling back to previous type {}", m_type);
+		return xpcf::_ERROR_TYPE;
+	}
 }
 
-xpcf::XPCFErrorCode SolARKeylineDetectorOpencv::initDetector()
+xpcf::XPCFErrorCode SolARKeylineDetectorNonFreeOpencv::initDetector()
 {
 	switch ( getType() )
 	{
 	case (api::features::KeylineDetectorType::FLD):
-		LOG_DEBUG("KeylineDetectorOpencv::setType(FLD) - Fast Line Detector");
+		LOG_DEBUG("SolARKeylineDetectorNonFreeOpencv::initDetector() - Fast Line Detector");
 		m_detector = cv::ximgproc::createFastLineDetector(m_minLineLength);
 		break;
 	case (api::features::KeylineDetectorType::LSD): /* /!\ LSD implementation has been removed since OpenCV 4 /!\ */
-		LOG_DEBUG("KeylineDetectorOpencv::setType(LSD) - Line Segment Detector");
+		LOG_DEBUG("SolARKeylineDetectorNonFreeOpencv::initDetector() - Line Segment Detector");
 #if CV_VERSION_MAJOR < 4
 		m_detector = cv::line_descriptor::LSDDetector::createLSDDetector();
 		break;
 #else
-		LOG_ERROR("KeylineDetectorOpencv::setType(LSD) - Implementation removed since OpenCV version 4");
+		LOG_ERROR("SolARKeylineDetectorNonFreeOpencv::initDetector() - Line Segment Detector implementation removed since OpenCV version 4");
 		return xpcf::_ERROR_TYPE;
 #endif
 	default:
@@ -100,12 +108,12 @@ xpcf::XPCFErrorCode SolARKeylineDetectorOpencv::initDetector()
 	return xpcf::_SUCCESS;
 }
 
-api::features::KeylineDetectorType SolARKeylineDetectorOpencv::getType()
+api::features::KeylineDetectorType SolARKeylineDetectorNonFreeOpencv::getType()
 {
 	return stringToType.at(m_type);
 }
 
-void SolARKeylineDetectorOpencv::detect(const SRef<datastructure::Image> image, std::vector<datastructure::Keyline>& keylines)
+void SolARKeylineDetectorNonFreeOpencv::detect(const SRef<Image> image, std::vector<Keyline>& keylines)
 {
 	float ratioInv = 1.f / m_imageRatio;
 
@@ -114,7 +122,6 @@ void SolARKeylineDetectorOpencv::detect(const SRef<datastructure::Image> image, 
 	// Conversion to grayscale
 	if (opencvImage.channels() != 1)
 		cv::cvtColor(opencvImage, opencvImage, cv::COLOR_BGR2GRAY);
-
 	try
 	{
 		if (!m_detector)
@@ -220,7 +227,7 @@ void SolARKeylineDetectorOpencv::detect(const SRef<datastructure::Image> image, 
 	}
 }
 
-std::vector<cv::Mat> SolARKeylineDetectorOpencv::computeGaussianPyramids(const cv::Mat & opencvImage, int numOctaves, int scale)
+std::vector<cv::Mat> SolARKeylineDetectorNonFreeOpencv::computeGaussianPyramids(const cv::Mat & opencvImage, int numOctaves, int scale)
 {
 	std::vector<cv::Mat> gaussianPyrs;
 	gaussianPyrs.resize(numOctaves);
@@ -233,7 +240,7 @@ std::vector<cv::Mat> SolARKeylineDetectorOpencv::computeGaussianPyramids(const c
 	return gaussianPyrs;
 }
 
-std::vector<Keyline> SolARKeylineDetectorOpencv::toSolARKeylines(const std::vector<cv::line_descriptor::KeyLine> & cvKeylines)
+std::vector<Keyline> SolARKeylineDetectorNonFreeOpencv::toSolARKeylines(const std::vector<cv::line_descriptor::KeyLine> & cvKeylines)
 {
 	float ratioInv = 1.f / m_imageRatio;
 	std::vector<Keyline> keylines;

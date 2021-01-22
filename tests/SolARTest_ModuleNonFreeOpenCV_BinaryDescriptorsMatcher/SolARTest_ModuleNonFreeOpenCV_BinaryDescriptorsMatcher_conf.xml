@@ -27,7 +27,7 @@
         </component>
     </module>
     <module uuid="28b89d39-41bd-451d-b19e-d25a3d7c5797" name="SolARModuleNonFreeOpenCV" description="SolARModuleNonFreeOpenCV" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleNonFreeOpenCV/0.9.2/lib/x86_64/shared">
-        <component uuid="be7c9a63-844e-42e2-8efb-e4848f94fbeb" name="SolARKeylineDetectorOpencv" description="SolARKeylineDetectorOpencv">
+        <component uuid="be7c9a63-844e-42e2-8efb-e4848f94fbeb" name="SolARKeylineDetectorNonFreeOpencv" description="SolARKeylineDetectorNonFreeOpencv">
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="e60589f3-46fe-40c3-b624-389e08682751" name="IKeylineDetector" description="IKeylineDetector"/>
         </component>
@@ -57,7 +57,7 @@
         <configure component="SolARImageLoaderOpencv" name="image2"> <!-- SolARImageLoaderOpencv -->
             <property name="filePath" type="string" value="../../data/Image2.png"/>
         </configure>
-        <configure component="SolARKeylineDetectorOpencv"> <!-- SolARKeylineDetectorOpencv -->
+        <configure component="SolARKeylineDetectorNonFreeOpencv"> <!-- SolARKeylineDetectorNonFreeOpencv -->
             <property name="type" type="string" value="FLD"/>
             <property name="imageRatio" type="Float" value="1"/>
             <property name="reductionRatio" type="Integer" value="2"/>

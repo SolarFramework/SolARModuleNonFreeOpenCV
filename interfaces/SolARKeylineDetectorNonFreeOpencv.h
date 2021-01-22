@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef SOLARKEYLINEDETECTOROPENCV_H
-#define SOLARKEYLINEDETECTOROPENCV_H
+#ifndef SOLARKEYLINEDETECTORNONFREEOPENCV_H
+#define SOLARKEYLINEDETECTORNONFREEOPENCV_H
 
 #include "api/features/IKeylineDetector.h"
 
@@ -29,23 +29,23 @@ namespace MODULES {
 namespace NONFREEOPENCV {
 
 /**
-* @class SolARKeylineDetectorOpenCV
+* @class SolARKeylineDetectorNonFreeOpencv
 * @brief <B>Detects keylines in an image.</B>
 * <TT>UUID: be7c9a63-844e-42e2-8efb-e4848f94fbeb</TT>
 *
 */
 
-	class SOLAROPENCVNONFREE_EXPORT_API SolARKeylineDetectorOpencv : public org::bcom::xpcf::ConfigurableBase,
+	class SOLAROPENCVNONFREE_EXPORT_API SolARKeylineDetectorNonFreeOpencv : public org::bcom::xpcf::ConfigurableBase,
 		public api::features::IKeylineDetector
 	{
 	public:
-		SolARKeylineDetectorOpencv();
-		~SolARKeylineDetectorOpencv() override;
+		SolARKeylineDetectorNonFreeOpencv();
+		~SolARKeylineDetectorNonFreeOpencv() override;
 		void unloadComponent() override final;
 
 		org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
 
-		void setType(api::features::KeylineDetectorType type) override;
+		org::bcom::xpcf::XPCFErrorCode setType(api::features::KeylineDetectorType type) override;
 
 		api::features::KeylineDetectorType getType() override;
 
@@ -78,4 +78,4 @@ namespace NONFREEOPENCV {
 }
 
 
-#endif // SOLARKEYLINEDETECTOROPENCV_H
+#endif // SOLARKEYLINEDETECTORNONFREEOPENCV_H

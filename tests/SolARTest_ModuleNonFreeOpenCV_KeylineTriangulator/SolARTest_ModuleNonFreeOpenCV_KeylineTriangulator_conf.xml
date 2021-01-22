@@ -79,7 +79,7 @@
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="9171561b-e957-403b-8991-f84022672780" name="IDescriptorsExtractorBinary" description="IDescriptorsExtractorBinary"/>
         </component>
-        <component uuid="be7c9a63-844e-42e2-8efb-e4848f94fbeb" name="SolARKeylineDetectorOpencv" description="SolARKeylineDetectorOpencv">
+        <component uuid="be7c9a63-844e-42e2-8efb-e4848f94fbeb" name="SolARKeylineDetectorNonFreeOpencv" description="SolARKeylineDetectorNonFreeOpencv">
             <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
             <interface uuid="e60589f3-46fe-40c3-b624-389e08682751" name="IKeylineDetector" description="IKeylineDetector"/>
         </component>
@@ -199,7 +199,7 @@
             <property name="epilinesDistance" type="Float" value="10.0"/>
             <property name="lineParallelismThreshold" type="Float" value="1e-5"/>
         </configure>
-        <configure component="SolARKeylineDetectorOpencv"> <!-- SolARKeylineDetectorOpencv -->
+        <configure component="SolARKeylineDetectorNonFreeOpencv"> <!-- SolARKeylineDetectorNonFreeOpencv -->
             <property name="type" type="string" value="FLD"/>
             <property name="imageRatio" type="Float" value="1"/>
             <property name="scale" type="Integer" value="2"/>
