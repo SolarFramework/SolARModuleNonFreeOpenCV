@@ -36,6 +36,24 @@ namespace NONFREEOPENCV {
  * @brief <B>Extracts the SURF descriptors (size 128) for a set of keypoints.</B>
  * <TT>UUID: fe14a310-d0a2-11e7-8fab-cec278b6b50a</TT>
  *
+ * @SolARComponentPropertiesBegin
+ * @SolARComponentProperty{ hessianThreshold,
+ *                          threshold for hessian keypoint detector used in SURF,
+ *                          @SolARComponentPropertyDescNum{ double, [0..MAX DOUBLE], 100 }}
+ * @SolARComponentProperty{ nbOctaves,
+ *                          number of pyramid octaves the keypoint detector will use,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 4 }}
+ * @SolARComponentProperty{ nbOctaveLayers,
+ *                          number of octave layers within each octave,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 3 }}
+ * @SolARComponentProperty{ extended,
+ *                          extended descriptor flag,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 0 }}
+ * @SolARComponentProperty{ upright,
+ *                          up-right or rotated features flag,
+ *                          @SolARComponentPropertyDescNum{ int, [0\, 1], 0 }}
+ * @SolARComponentPropertiesEnd
+ *
  */
 
 class SOLAROPENCVNONFREE_EXPORT_API SolARDescriptorsExtractorSURF128Opencv : public org::bcom::xpcf::ConfigurableBase,
