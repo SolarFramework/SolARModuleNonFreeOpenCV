@@ -40,6 +40,7 @@ using namespace cv::xfeatures2d;
 
 namespace SolAR {
 using namespace datastructure;
+using namespace api::features;
 namespace MODULES {
 namespace NONFREEOPENCV {
 
@@ -71,7 +72,7 @@ xpcf::XPCFErrorCode SolARKeypointDetectorNonFreeOpencv::onConfigured()
 {
     LOG_DEBUG(" SolARKeypointDetectorOpencv onConfigured");
     setType(stringToType.at(m_type));
-    return xpcf::_SUCCESS;
+    return xpcf::XPCFErrorCode::_SUCCESS;
 }
 
 

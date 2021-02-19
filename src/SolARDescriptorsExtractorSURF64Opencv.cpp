@@ -46,7 +46,7 @@ xpcf::XPCFErrorCode SolARDescriptorsExtractorSURF64Opencv::onConfigured()
 {
     // m_extractor must have a default implementation : initialize default extractor type
     m_extractor=SURF::create(m_hessianThreshold,m_nbOctaves,m_nbOctaveLayers, (bool)m_extended, (bool)m_upright);
-    return xpcf::_SUCCESS;
+    return xpcf::XPCFErrorCode::_SUCCESS;
 }
 
 SolARDescriptorsExtractorSURF64Opencv::~SolARDescriptorsExtractorSURF64Opencv()

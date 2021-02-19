@@ -28,7 +28,6 @@
 #include "opencv2/xfeatures2d.hpp"
 
 namespace SolAR {
-using namespace datastructure;
 namespace MODULES {
 namespace NONFREEOPENCV {
 
@@ -36,6 +35,24 @@ namespace NONFREEOPENCV {
  * @class SolARDescriptorsExtractorSURF128Opencv
  * @brief <B>Extracts the SURF descriptors (size 128) for a set of keypoints.</B>
  * <TT>UUID: fe14a310-d0a2-11e7-8fab-cec278b6b50a</TT>
+ *
+ * @SolARComponentPropertiesBegin
+ * @SolARComponentProperty{ hessianThreshold,
+ *                          threshold for hessian keypoint detector used in SURF,
+ *                          @SolARComponentPropertyDescNum{ double, [0..MAX DOUBLE], 100 }}
+ * @SolARComponentProperty{ nbOctaves,
+ *                          number of pyramid octaves the keypoint detector will use,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 4 }}
+ * @SolARComponentProperty{ nbOctaveLayers,
+ *                          number of octave layers within each octave,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 3 }}
+ * @SolARComponentProperty{ extended,
+ *                          extended descriptor flag,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 0 }}
+ * @SolARComponentProperty{ upright,
+ *                          up-right or rotated features flag,
+ *                          @SolARComponentPropertyDescNum{ int, [0\, 1], 0 }}
+ * @SolARComponentPropertiesEnd
  *
  */
 
@@ -52,7 +69,7 @@ public:
     /// [in] image: source image.
     /// [in] keypoints: set of keypoints.
     /// [out] decsriptors: set of computed descriptors.
-    void extract (const SRef<Image> image, const std::vector<Keypoint> & keypoints, SRef<DescriptorBuffer>& descriptors) override;
+    void extract (const SRef<datastructure::Image> image, const std::vector<datastructure::Keypoint> & keypoints, SRef<datastructure::DescriptorBuffer>& descriptors) override;
 
 private:
     cv::Ptr<cv::Feature2D> m_extractor;
