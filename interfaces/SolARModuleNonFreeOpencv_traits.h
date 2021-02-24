@@ -18,6 +18,7 @@ namespace NONFREEOPENCV {
 class SolARDescriptorsExtractorSURF128Opencv;
 class SolARDescriptorsExtractorSURF64Opencv;
 class SolARKeypointDetectorNonFreeOpencv;
+class SolARFiducialMarkerPoseEstimatorOpencv;
 }
 }
 }
@@ -36,3 +37,8 @@ XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARKeypointDetecto
                              "d1f9317c-9519-4671-8ff5-4629773544f2",
                              "SolARKeypointDetectorNonFreeOpencv",
                              "Detects keypoints in an image (based on SIFT or SURF algorithm).")
+
+XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::NONFREEOPENCV::SolARFiducialMarkerPoseEstimatorOpencv,
+							 "2b952e6c-ddd4-4316-ac9a-d3fad0b33b32",
+							 "SolARFiducialMarkerPoseEstimatorOpencv",
+							 "Estimate camera pose based on a fiducial marker using Aruco library.")

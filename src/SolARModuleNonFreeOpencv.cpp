@@ -19,6 +19,7 @@
 #include "SolARDescriptorsExtractorSURF128Opencv.h"
 #include "SolARDescriptorsExtractorSURF64Opencv.h"
 #include "SolARKeypointDetectorNonFreeOpencv.h"
+#include "SolARFiducialMarkerPoseEstimatorOpencv.h"
 
 
 namespace xpcf=org::bcom::xpcf;
@@ -40,6 +41,11 @@ extern "C" XPCF_MODULEHOOKS_API xpcf::XPCFErrorCode XPCF_getComponent(const boos
     {
         errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARKeypointDetectorNonFreeOpencv>(componentUUID,interfaceRef);
     }
+
+	if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
+	{
+		errCode = xpcf::tryCreateComponent<SolAR::MODULES::NONFREEOPENCV::SolARFiducialMarkerPoseEstimatorOpencv>(componentUUID, interfaceRef);
+	}
     return errCode;
 }
 
@@ -47,4 +53,5 @@ XPCF_BEGIN_COMPONENTS_DECLARATION
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF128Opencv)
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARDescriptorsExtractorSURF64Opencv)
 XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARKeypointDetectorNonFreeOpencv)
+XPCF_ADD_COMPONENT(SolAR::MODULES::NONFREEOPENCV::SolARFiducialMarkerPoseEstimatorOpencv)
 XPCF_END_COMPONENTS_DECLARATION
