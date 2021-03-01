@@ -51,7 +51,7 @@ SOURCES += src/SolARModuleNonFreeOpencv.cpp \
     src/SolARDescriptorsExtractorSURF128Opencv.cpp \
     src/SolARKeypointDetectorNonFreeOpencv.cpp \
     src/SolARNonFreeOpenCVHelper.cpp
- 
+
 unix:!android {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
 #    QMAKE_LINK=clang++
@@ -77,7 +77,7 @@ win32 {
 }
 
 android {
-    QMAKE_LFLAGS += -nostdlib++
+#    QMAKE_LFLAGS += -nostdlib++
     ANDROID_ABIS="arm64-v8a"
 }
 
