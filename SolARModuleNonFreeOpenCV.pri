@@ -3,11 +3,13 @@ interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
 interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
 interfaces/SolARDescriptorsExtractorSIFTOpencv.h \
 interfaces/SolARKeypointDetectorNonFreeOpencv.h \
+interfaces/SolARFiducialMarkerPoseEstimatorOpencv.h \
 interfaces/SolARModuleNonFreeOpencv_traits.h
 
 SOURCES += src/SolARModuleNonFreeOpencv.cpp \
     src/SolARDescriptorsExtractorSIFTOpencv.cpp \
     src/SolARDescriptorsExtractorSURF64Opencv.cpp \
     src/SolARDescriptorsExtractorSURF128Opencv.cpp \
-    src/SolARKeypointDetectorNonFreeOpencv.cpp
+    src/SolARKeypointDetectorNonFreeOpencv.cpp \
+    src/SolARFiducialMarkerPoseEstimatorOpencv.cpp
  
