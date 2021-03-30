@@ -6,7 +6,7 @@ CONFIG -= qt
 INSTALLSUBDIR = SolARBuild
 TARGET = SolARModuleNonFreeOpenCV
 FRAMEWORK = $$TARGET
-VERSION=0.9.0
+VERSION=0.9.1
 
 DEFINES += MYVERSION=$${VERSION}
 DEFINES += TEMPLATE_LIBRARY
@@ -44,12 +44,14 @@ interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
 interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
 interfaces/SolARKeypointDetectorNonFreeOpencv.h \
     interfaces/SolARModuleNonFreeOpencv_traits.h \
+    interfaces/SolARFiducialMarkerPoseEstimatorOpencv.h \
     interfaces/SolARNonFreeOpenCVHelper.h
 
 SOURCES += src/SolARModuleNonFreeOpencv.cpp \
     src/SolARDescriptorsExtractorSURF64Opencv.cpp \
     src/SolARDescriptorsExtractorSURF128Opencv.cpp \
     src/SolARKeypointDetectorNonFreeOpencv.cpp \
+    src/SolARFiducialMarkerPoseEstimatorOpencv.cpp \
     src/SolARNonFreeOpenCVHelper.cpp
 
 unix:!android {
