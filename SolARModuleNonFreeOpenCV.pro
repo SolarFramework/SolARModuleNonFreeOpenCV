@@ -42,16 +42,16 @@ INCLUDEPATH += interfaces/
 HEADERS += interfaces/SolAROpencvNonFreeAPI.h \
 interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
 interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
+    interfaces/SolARFiducialMarkerPoseEstimatorNonFreeOpencv.h \
 interfaces/SolARKeypointDetectorNonFreeOpencv.h \
     interfaces/SolARModuleNonFreeOpencv_traits.h \
-    interfaces/SolARFiducialMarkerPoseEstimatorOpencv.h \
     interfaces/SolARNonFreeOpenCVHelper.h
 
 SOURCES += src/SolARModuleNonFreeOpencv.cpp \
     src/SolARDescriptorsExtractorSURF64Opencv.cpp \
     src/SolARDescriptorsExtractorSURF128Opencv.cpp \
+    src/SolARFiducialMarkerPoseEstimatorNonFreeOpencv.cpp \
     src/SolARKeypointDetectorNonFreeOpencv.cpp \
-    src/SolARFiducialMarkerPoseEstimatorOpencv.cpp \
     src/SolARNonFreeOpenCVHelper.cpp
 
 unix:!android {

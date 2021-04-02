@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "SolARFiducialMarkerPoseEstimatorOpencv.h"
+#include "SolARFiducialMarkerPoseEstimatorNonFreeOpencv.h"
 #include "SolARNonFreeOpenCVHelper.h"
 #include "core/Log.h"
 
 //#include <boost/thread/thread.hpp>
-XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARFiducialMarkerPoseEstimatorOpencv);
+XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::NONFREEOPENCV::SolARFiducialMarkerPoseEstimatorNonFreeOpencv);
 
 namespace xpcf = org::bcom::xpcf;
 
@@ -28,20 +28,19 @@ using namespace datastructure;
 namespace MODULES {
 namespace NONFREEOPENCV {
 
-SolARFiducialMarkerPoseEstimatorOpencv::SolARFiducialMarkerPoseEstimatorOpencv():ConfigurableBase(xpcf::toUUID<SolARDescriptorsExtractorSURF64Opencv>())
+SolARFiducialMarkerPoseEstimatorNonFreeOpencv::SolARFiducialMarkerPoseEstimatorNonFreeOpencv():ConfigurableBase(xpcf::toUUID<SolARDescriptorsExtractorSURF64Opencv>())
 {
-    declareInterface<api::solver::pose::IFiducialMarkerPose>(this);
-	declareInjectable<api::input::files::IMarker2DSquaredBinary>(m_binaryMarker);
+    declareInterface<api::solver::pose::ITrackablePose>(this);
 	declareInjectable<api::solver::pose::I3DTransformFinderFrom2D3D>(m_pnp);
 	declareInjectable<api::geom::IProject>(m_projector);
 	declareProperty("nbThreshold", m_nbThreshold);
 	declareProperty("minThreshold", m_minThreshold);
 	declareProperty("maxThreshold", m_maxThreshold);
 	declareProperty("maxReprojError", m_maxReprojError);
-    LOG_DEBUG(" SolARFiducialMarkerPoseEstimatorOpencv constructor")
+    LOG_DEBUG(" SolARFiducialMarkerPoseEstimatorNonFreeOpencv constructor")
 }
 
-void SolARFiducialMarkerPoseEstimatorOpencv::setDictionary(const datastructure::SquaredBinaryPattern &pattern)
+void SolARFiducialMarkerPoseEstimatorNonFreeOpencv::setDictionary(const datastructure::SquaredBinaryPattern &pattern)
 {
 	int patternSize = pattern.getSize();
 	const SquaredBinaryPatternMatrix &patternMatrix = pattern.getPatternMatrix();
@@ -56,18 +55,15 @@ void SolARFiducialMarkerPoseEstimatorOpencv::setDictionary(const datastructure::
 	m_dictionary->bytesList.push_back(markerCompressed);
 }
 
-xpcf::XPCFErrorCode SolARFiducialMarkerPoseEstimatorOpencv::onConfigured()
+xpcf::XPCFErrorCode SolARFiducialMarkerPoseEstimatorNonFreeOpencv::onConfigured()
 {	
-	m_binaryMarker->loadMarker();
-	LOG_DEBUG("Marker pattern:\n {}", m_binaryMarker->getPattern().getPatternMatrix());
-	setDictionary(m_binaryMarker->getPattern());
 	m_detectorParams = cv::aruco::DetectorParameters::create();
 	m_detectorParams->cornerRefinementMethod = cv::aruco::CORNER_REFINE_SUBPIX;
-	LOG_DEBUG(" SolARFiducialMarkerPoseEstimatorOpencv configured");
+    LOG_DEBUG(" SolARFiducialMarkerPoseEstimatorNonFreeOpencv configured");
     return xpcf::XPCFErrorCode::_SUCCESS;
 }
 
-void SolARFiducialMarkerPoseEstimatorOpencv::setCameraParameters(const CamCalibration & intrinsicParams, const CamDistortion & distortionParams) {
+void SolARFiducialMarkerPoseEstimatorNonFreeOpencv::setCameraParameters(const CamCalibration & intrinsicParams, const CamDistortion & distortionParams) {
 	m_camMatrix.create(3, 3, CV_32FC1);
 	m_camDistortion.create(5, 1, CV_32FC1);
 	this->m_camDistortion.at<float>(0, 0) = distortionParams(0);
@@ -90,21 +86,28 @@ void SolARFiducialMarkerPoseEstimatorOpencv::setCameraParameters(const CamCalibr
 	m_projector->setCameraParameters(intrinsicParams, distortionParams);
 }
 
-void SolARFiducialMarkerPoseEstimatorOpencv::setMarker(const SRef<api::input::files::IMarker2DSquaredBinary> marker)
+FrameworkReturnCode SolARFiducialMarkerPoseEstimatorNonFreeOpencv::setTrackable(const SRef<datastructure::Trackable> trackable)
 {
-	m_binaryMarker = marker;	
-	setDictionary(m_binaryMarker->getPattern());
-	LOG_DEBUG("Marker pattern:\n {}", m_binaryMarker->getPattern().getPatternMatrix());
+    // components initialisation for marker detection
+    if (trackable->getType() == TrackableType::FIDUCIAL_MARKER)
+    {
+        m_fiducialMarker = xpcf::utils::dynamic_pointer_cast<FiducialMarker>(trackable);
+        setDictionary(m_fiducialMarker->getPattern());
+        LOG_DEBUG("Marker pattern:\n {}", m_fiducialMarker->getPattern().getPatternMatrix());
+    }
+    else {
+        LOG_ERROR("The SolARFiducialMarkerPoseEstimator should only use a trackable of type FIDUCIAL_MARKER")
+        return FrameworkReturnCode::_ERROR_;
+    }
+    return FrameworkReturnCode::_SUCCESS;
+
+
+//    m_binaryMarker = marker;
+
+//	LOG_DEBUG("Marker pattern:\n {}", m_binaryMarker->getPattern().getPatternMatrix());
 }
 
-void SolARFiducialMarkerPoseEstimatorOpencv::setMarker(const SRef<datastructure::FiducialMarker> marker)
-{
-	m_binaryMarker->setSize(marker->getWidth(), marker->getHeight());
-	setDictionary(marker->getPattern());
-	LOG_DEBUG("Marker pattern:\n {}", marker->getPattern().getPatternMatrix());
-}
-
-FrameworkReturnCode SolARFiducialMarkerPoseEstimatorOpencv::estimate(const SRef<Image> image, Transform3Df & pose)
+FrameworkReturnCode SolARFiducialMarkerPoseEstimatorNonFreeOpencv::estimate(const SRef<Image> image, Transform3Df & pose)
 {	
 	cv::Mat opencvImage;
 	SolARNonFreeOpenCVHelper::mapToOpenCV(image, opencvImage);
@@ -123,7 +126,7 @@ FrameworkReturnCode SolARFiducialMarkerPoseEstimatorOpencv::estimate(const SRef<
 	std::vector<Point3Df> pattern3DPoints;
 	for (const auto &it : corners[0])
 		img2DPoints.push_back(Point2Df(it.x, it.y));
-	m_binaryMarker->getWorldCorners(pattern3DPoints);
+    m_fiducialMarker->getWorldCorners(pattern3DPoints);
 	// Compute the pose of the camera using a Perspective n Points algorithm using only the 4 corners of the marker
 	if (m_pnp->estimate(img2DPoints, pattern3DPoints, pose) == FrameworkReturnCode::_SUCCESS){
 		std::vector<Point2Df> projected2DPts;
