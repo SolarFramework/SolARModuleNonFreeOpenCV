@@ -1,1 +1,1 @@
-opencv|4.4.0|opencv|conan-solar@conan|conan-solar|default|gapi=False#contrib=True#nonfree=True#harfbuzz=False#tiff=False
+opencv|4.5.2|opencv|conan-solar@conan|conan-solar|default|webp=False#contrib=True
