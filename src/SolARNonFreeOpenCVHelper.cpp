@@ -79,7 +79,7 @@ std::vector<cv::Point2i> SolARNonFreeOpenCVHelper::convertToOpenCV (const Contou
     std::vector<cv::Point2i> output;
     for (int i = 0; i < contour.size(); i++)
     {
-        output.push_back(cv::Point2i(contour[i]->getX(), contour[i]->getY()));
+        output.push_back(cv::Point2i(contour[i].getX(), contour[i].getY()));
     }
     return output;
 }
