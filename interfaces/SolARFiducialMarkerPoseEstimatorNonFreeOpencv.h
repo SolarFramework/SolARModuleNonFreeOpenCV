@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef SOLARFIDUCIALMARKERPOSEESTIMATOROPENCV_H
-#define SOLARFIDUCIALMARKERPOSEESTIMATOROPENCV_H
+#ifndef SOLARFIDUCIALMARKERPOSEESTIMATORNONFREEOPENCV_H
+#define SOLARFIDUCIALMARKERPOSEESTIMATORNONFREEOPENCV_H
 
-#include "api/solver/pose/IFiducialMarkerPose.h"
+#include "xpcf/component/ConfigurableBase.h"
+#include "api/solver/pose/ITrackablePose.h"
 #include "api/geom/IProject.h"
 #include "api/solver/pose/I3DTransformFinderFrom2D3D.h"
-#include "xpcf/component/ConfigurableBase.h"
+#include "datastructure/FiducialMarker.h"
 #include "SolAROpencvNonFreeAPI.h"
 #include <string>
 #include "opencv2/opencv.hpp"
@@ -31,12 +32,11 @@ namespace MODULES {
 namespace NONFREEOPENCV {
 
 /**
-* @class SolARFiducialMarkerPoseEstimatorOpencv
+* @class SolARFiducialMarkerPoseEstimatorNonFreeOpencv
 * @brief <B>Estimate camera pose based on a fiducial marker using Aruco library.</B>
 * <TT>UUID: 2b952e6c-ddd4-4316-ac9a-d3fad0b33b32</TT>
 *
 * @SolARComponentInjectablesBegin
-* @SolARComponentInjectable{SolAR::api::input::files::IMarker2DSquaredBinary}
 * @SolARComponentInjectable{SolAR::api::solver::pose::I3DTransformFinderFrom2D3D}
 * @SolARComponentInjectable{SolAR::api::geom::IProject}
 * @SolARComponentInjectablesEnd
@@ -56,13 +56,13 @@ namespace NONFREEOPENCV {
 *
 */
 
-class SOLAROPENCVNONFREE_EXPORT_API SolARFiducialMarkerPoseEstimatorOpencv : public org::bcom::xpcf::ConfigurableBase,
-        public api::solver::pose::IFiducialMarkerPose {
+class SOLAROPENCVNONFREE_EXPORT_API SolARFiducialMarkerPoseEstimatorNonFreeOpencv : public org::bcom::xpcf::ConfigurableBase,
+        public api::solver::pose::ITrackablePose {
 public:
 	///@brief SolAR3DTransformEstimationFrom3D3D constructor;
-	SolARFiducialMarkerPoseEstimatorOpencv();
+    SolARFiducialMarkerPoseEstimatorNonFreeOpencv();
 	///@brief SolAR3DTransformEstimationFrom3D3D destructor;
-	~SolARFiducialMarkerPoseEstimatorOpencv() = default;
+    ~SolARFiducialMarkerPoseEstimatorNonFreeOpencv() = default;
     org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
 	/// @brief this method is used to set intrinsic parameters and distorsion of the camera
 	/// @param[in] Camera calibration matrix parameters.
@@ -71,11 +71,7 @@ public:
 
 	/// @brief this method is used to set the fiducial marker
 	/// @param[in] Fiducial marker.
-	void setMarker(const SRef<api::input::files::IMarker2DSquaredBinary> marker) override;
-
-	/// @brief this method is used to set the fiducial marker
-	/// @param[in] Fiducial marker.
-	void setMarker(const SRef<datastructure::FiducialMarker> marker) override;
+    FrameworkReturnCode setTrackable(const SRef<SolAR::datastructure::Trackable> trackable) override;
 
 	/// @brief Estimates camera pose based on a fiducial marker.
 	/// @param[in] image: input image.
@@ -87,14 +83,14 @@ public:
 
 private:
 
-	void setDictionary(const datastructure::SquaredBinaryPattern &pattern);
+    void setDictionary(const datastructure::SquaredBinaryPattern &pattern);
 
 private:
 	cv::Mat												m_camMatrix;
 	cv::Mat												m_camDistortion;
 	cv::Ptr<cv::aruco::Dictionary>						m_dictionary;
 	cv::Ptr<cv::aruco::DetectorParameters>				m_detectorParams;
-	SRef<api::input::files::IMarker2DSquaredBinary>		m_binaryMarker;
+    SRef<datastructure::FiducialMarker>                 m_fiducialMarker;
 	SRef<api::solver::pose::I3DTransformFinderFrom2D3D>	m_pnp;
 	SRef<api::geom::IProject>							m_projector;
 	int													m_nbThreshold = 3;
@@ -109,4 +105,4 @@ private:
 
 
 
-#endif // SOLARFIDUCIALMARKERPOSEESTIMATOROPENCV_H
+#endif // SOLARFIDUCIALMARKERPOSEESTIMATORNONFREEOPENCV_H

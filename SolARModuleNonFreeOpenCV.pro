@@ -6,7 +6,7 @@ CONFIG -= qt
 INSTALLSUBDIR = SolARBuild
 TARGET = SolARModuleNonFreeOpenCV
 FRAMEWORK = $$TARGET
-VERSION=0.9.1
+VERSION=0.10.0
 
 DEFINES += MYVERSION=$${VERSION}
 DEFINES += TEMPLATE_LIBRARY
@@ -42,22 +42,27 @@ INCLUDEPATH += interfaces/
 HEADERS += interfaces/SolAROpencvNonFreeAPI.h \
 interfaces/SolARDescriptorsExtractorSURF64Opencv.h \
 interfaces/SolARDescriptorsExtractorSURF128Opencv.h \
+    interfaces/SolARFiducialMarkerPoseEstimatorNonFreeOpencv.h \
 interfaces/SolARKeypointDetectorNonFreeOpencv.h \
     interfaces/SolARModuleNonFreeOpencv_traits.h \
-    interfaces/SolARFiducialMarkerPoseEstimatorOpencv.h \
     interfaces/SolARNonFreeOpenCVHelper.h
 
 SOURCES += src/SolARModuleNonFreeOpencv.cpp \
     src/SolARDescriptorsExtractorSURF64Opencv.cpp \
     src/SolARDescriptorsExtractorSURF128Opencv.cpp \
+    src/SolARFiducialMarkerPoseEstimatorNonFreeOpencv.cpp \
     src/SolARKeypointDetectorNonFreeOpencv.cpp \
-    src/SolARFiducialMarkerPoseEstimatorOpencv.cpp \
     src/SolARNonFreeOpenCVHelper.cpp
 
 unix:!android {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
 #    QMAKE_LINK=clang++
 #    QMAKE_CXX = clang++
+}
+
+linux {
+    QMAKE_LFLAGS += -ldl
+    LIBS += -L/home/linuxbrew/.linuxbrew/lib # temporary fix caused by grpc with -lre2 ... without -L in grpc.pc
 }
 
 macx {
