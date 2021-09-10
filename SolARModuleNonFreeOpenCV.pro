@@ -2,6 +2,8 @@
 QT       -= core gui
 CONFIG -= qt
 
+QMAKE_PROJECT_DEPTH = 0
+
 ## global definitions : target lib name, version
 INSTALLSUBDIR = SolARBuild
 TARGET = SolARModuleNonFreeOpenCV
