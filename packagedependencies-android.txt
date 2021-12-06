@@ -1,2 +1,2 @@
-opencv|4.5.2|opencv|conan-solar@conan|conan-solar|default|dnn=False#contrib=True#world=True
+opencv|4.4.0|opencv|conan-solar@conan|conan-solar|default|dnn=False#contrib=True#world=True
 
