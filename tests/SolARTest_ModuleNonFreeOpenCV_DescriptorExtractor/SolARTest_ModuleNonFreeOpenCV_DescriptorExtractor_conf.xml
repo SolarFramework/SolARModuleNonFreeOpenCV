@@ -28,7 +28,7 @@
 	
     <properties>
         <configure component="SolARImageLoaderOpencv">
-            <property name="filePath" type="string" value="../../data/graf1.png"/>
+            <property name="filePath" type="string" value="../../../../data/graf1.png"/>
         </configure>
         <configure component="SolARKeypointDetectorNonFreeOpencv">
             <property name="type" type="string" value="SURF"/>
