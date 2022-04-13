@@ -6,7 +6,7 @@ QMAKE_PROJECT_DEPTH = 0
 
 ## global definitions : target lib name, version
 INSTALLSUBDIR = SolARBuild
-TARGET = SolARModuleNonFreeOpenCV
+TARGET = SolARModuleNonFreeOpenCVCuda
 FRAMEWORK = $$TARGET
 VERSION=0.11.0
 
@@ -14,7 +14,7 @@ DEFINES += MYVERSION=$${VERSION}
 DEFINES += TEMPLATE_LIBRARY
 CONFIG += c++1z
 
-DEFINES += WITHOUTCUDA
+DEFINES += WITHCUDA
 
 include(findremakenrules.pri)
 
