@@ -61,23 +61,24 @@ class SOLAROPENCVNONFREE_EXPORT_API SolARFiducialMarkerPoseEstimatorNonFreeOpenc
 public:
 	///@brief SolAR3DTransformEstimationFrom3D3D constructor;
     SolARFiducialMarkerPoseEstimatorNonFreeOpencv();
+
 	///@brief SolAR3DTransformEstimationFrom3D3D destructor;
     ~SolARFiducialMarkerPoseEstimatorNonFreeOpencv() = default;
+
     org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
-	/// @brief this method is used to set intrinsic parameters and distorsion of the camera
-	/// @param[in] Camera calibration matrix parameters.
-	/// @param[in] Camera distorsion parameters.
-	void setCameraParameters(const datastructure::CamCalibration & intrinsicParams, const datastructure::CamDistortion & distorsionParams) override;
 
 	/// @brief this method is used to set the fiducial marker
 	/// @param[in] Fiducial marker.
     FrameworkReturnCode setTrackable(const SRef<SolAR::datastructure::Trackable> trackable) override;
 
-	/// @brief Estimates camera pose based on a fiducial marker.
-	/// @param[in] image: input image.
-	/// @param[out] pose: camera pose.
-	/// @return FrameworkReturnCode::_SUCCESS if the estimation succeed, else FrameworkReturnCode::_ERROR_
-	FrameworkReturnCode estimate(const SRef<datastructure::Image> image, datastructure::Transform3Df & pose) override;
+    /// @brief Estimates camera pose based on a fiducial marker.
+    /// @param[in] image input image.
+    /// @param[in] camParams the camera parameters.
+    /// @param[out] pose camera pose.
+    /// @return FrameworkReturnCode::_SUCCESS if the estimation succeed, else FrameworkReturnCode::_ERROR_
+    FrameworkReturnCode estimate(const SRef<SolAR::datastructure::Image> image,
+                                 const SolAR::datastructure::CameraParameters & camParams,
+                                 SolAR::datastructure::Transform3Df & pose) override;
 
 	void unloadComponent() override final;
 
@@ -86,8 +87,6 @@ private:
     void setDictionary(const datastructure::SquaredBinaryPattern &pattern);
 
 private:
-	cv::Mat												m_camMatrix;
-	cv::Mat												m_camDistortion;
 	cv::Ptr<cv::aruco::Dictionary>						m_dictionary;
 	cv::Ptr<cv::aruco::DetectorParameters>				m_detectorParams;
     SRef<datastructure::FiducialMarker>                 m_fiducialMarker;

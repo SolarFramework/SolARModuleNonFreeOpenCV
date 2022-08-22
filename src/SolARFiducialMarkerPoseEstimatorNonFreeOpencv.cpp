@@ -63,29 +63,6 @@ xpcf::XPCFErrorCode SolARFiducialMarkerPoseEstimatorNonFreeOpencv::onConfigured(
     return xpcf::XPCFErrorCode::_SUCCESS;
 }
 
-void SolARFiducialMarkerPoseEstimatorNonFreeOpencv::setCameraParameters(const CamCalibration & intrinsicParams, const CamDistortion & distortionParams) {
-	m_camMatrix.create(3, 3, CV_32FC1);
-	m_camDistortion.create(5, 1, CV_32FC1);
-	this->m_camDistortion.at<float>(0, 0) = distortionParams(0);
-	this->m_camDistortion.at<float>(1, 0) = distortionParams(1);
-	this->m_camDistortion.at<float>(2, 0) = distortionParams(2);
-	this->m_camDistortion.at<float>(3, 0) = distortionParams(3);
-	this->m_camDistortion.at<float>(4, 0) = distortionParams(4);
-
-	this->m_camMatrix.at<float>(0, 0) = intrinsicParams(0, 0);
-	this->m_camMatrix.at<float>(0, 1) = intrinsicParams(0, 1);
-	this->m_camMatrix.at<float>(0, 2) = intrinsicParams(0, 2);
-	this->m_camMatrix.at<float>(1, 0) = intrinsicParams(1, 0);
-	this->m_camMatrix.at<float>(1, 1) = intrinsicParams(1, 1);
-	this->m_camMatrix.at<float>(1, 2) = intrinsicParams(1, 2);
-	this->m_camMatrix.at<float>(2, 0) = intrinsicParams(2, 0);
-	this->m_camMatrix.at<float>(2, 1) = intrinsicParams(2, 1);
-	this->m_camMatrix.at<float>(2, 2) = intrinsicParams(2, 2);
-
-	m_pnp->setCameraParameters(intrinsicParams, distortionParams);
-	m_projector->setCameraParameters(intrinsicParams, distortionParams);
-}
-
 FrameworkReturnCode SolARFiducialMarkerPoseEstimatorNonFreeOpencv::setTrackable(const SRef<datastructure::Trackable> trackable)
 {
     // components initialisation for marker detection
@@ -107,7 +84,7 @@ FrameworkReturnCode SolARFiducialMarkerPoseEstimatorNonFreeOpencv::setTrackable(
 //	LOG_DEBUG("Marker pattern:\n {}", m_binaryMarker->getPattern().getPatternMatrix());
 }
 
-FrameworkReturnCode SolARFiducialMarkerPoseEstimatorNonFreeOpencv::estimate(const SRef<Image> image, Transform3Df & pose)
+FrameworkReturnCode SolARFiducialMarkerPoseEstimatorNonFreeOpencv::estimate(const SRef<Image> image, const SolAR::datastructure::CameraParameters & camParams, Transform3Df & pose)
 {	
 	cv::Mat opencvImage;
 	SolARNonFreeOpenCVHelper::mapToOpenCV(image, opencvImage);
@@ -128,9 +105,9 @@ FrameworkReturnCode SolARFiducialMarkerPoseEstimatorNonFreeOpencv::estimate(cons
 		img2DPoints.push_back(Point2Df(it.x, it.y));
     m_fiducialMarker->getWorldCorners(pattern3DPoints);
 	// Compute the pose of the camera using a Perspective n Points algorithm using only the 4 corners of the marker
-	if (m_pnp->estimate(img2DPoints, pattern3DPoints, pose) == FrameworkReturnCode::_SUCCESS){
+	if (m_pnp->estimate(img2DPoints, pattern3DPoints, camParams, pose) == FrameworkReturnCode::_SUCCESS){
 		std::vector<Point2Df> projected2DPts;
-		m_projector->project(pattern3DPoints, projected2DPts, pose);
+		m_projector->project(pattern3DPoints, pose, camParams, projected2DPts);
 		float errorReproj(0.f);
 		for (int j = 0; j < projected2DPts.size(); ++j)
 			errorReproj += (projected2DPts[j] - img2DPoints[j]).norm();
