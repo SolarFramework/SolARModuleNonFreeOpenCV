@@ -92,3 +92,5 @@ tests/bin
 *.TMP
 *.tmp
 .git Merge
+
+bundle_system_install.sh
