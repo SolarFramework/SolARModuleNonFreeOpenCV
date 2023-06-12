@@ -61,12 +61,7 @@ SOURCES += src/SolARModuleNonFreeOpencv.cpp \
 unix {
     # Avoids adding install steps manually. To be commented to have a better control over them.
     QMAKE_POST_LINK += "make install install_deps"
-}
-
-unix:!android {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
-#    QMAKE_LINK=clang++
-#    QMAKE_CXX = clang++
 }
 
 linux {
@@ -83,10 +78,6 @@ win32 {
     QMAKE_CXXFLAGS_RELEASE += /O2
 }
 
-android {
-#    QMAKE_LFLAGS += -nostdlib++
-    ANDROID_ABIS="arm64-v8a"
-}
 
 header_files.path = $${PROJECTDEPLOYDIR}/interfaces
 header_files.files = $$files($${PWD}/interfaces/*.h*)
@@ -101,7 +92,6 @@ OTHER_FILES += \
     packagedependencies.txt \
     packagedependencies-linux.txt \
     packagedependencies-win.txt \
-    packagedependencies-android.txt \
     extra-packages.txt \
     extra-packages-linux.txt
 
