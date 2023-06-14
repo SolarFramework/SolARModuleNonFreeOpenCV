@@ -1,3 +1,5 @@
+# DEPRECATED - This repo is no longer maintained
+----
 # SolARModuleNonFreeOpenCV
 
 [![License](https://img.shields.io/github/license/SolARFramework/SolARModuleNonFreeOpencv?style=flat-square&label=License)](https://www.apache.org/licenses/LICENSE-2.0)
